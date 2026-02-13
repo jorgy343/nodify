@@ -1,23 +1,23 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui">
     <ResourceDictionary.MergedDictionaries>
         <!--NODES-->
-        <ResourceDictionary Source="Node.xaml" />
-        <ResourceDictionary Source="KnotNode.xaml" />
-        <ResourceDictionary Source="GroupingNode.xaml" />
-        <ResourceDictionary Source="StateNode.xaml" />
-        <ResourceDictionary Source="Connector.xaml" />
-        <ResourceDictionary Source="NodeInput.xaml" />
-        <ResourceDictionary Source="NodeOutput.xaml" />
-        <ResourceDictionary Source="Connection.xaml" />
-        <ResourceDictionary Source="PendingConnection.xaml" />
-        <ResourceDictionary Source="CuttingLine.xaml" />
+        <ResourceDictionary Source="Node.axaml" />
+        <ResourceDictionary Source="KnotNode.axaml" />
+        <ResourceDictionary Source="GroupingNode.axaml" />
+        <ResourceDictionary Source="StateNode.axaml" />
+        <ResourceDictionary Source="Connector.axaml" />
+        <ResourceDictionary Source="NodeInput.axaml" />
+        <ResourceDictionary Source="NodeOutput.axaml" />
+        <ResourceDictionary Source="Connection.axaml" />
+        <ResourceDictionary Source="PendingConnection.axaml" />
+        <ResourceDictionary Source="CuttingLine.axaml" />
 
         <!--CORE-->
-        <ResourceDictionary Source="ItemContainer.xaml" />
-        <ResourceDictionary Source="DecoratorContainer.xaml" />
-        <ResourceDictionary Source="NodifyEditor.xaml" />
+        <ResourceDictionary Source="ItemContainer.axaml" />
+        <ResourceDictionary Source="DecoratorContainer.axaml" />
+        <ResourceDictionary Source="NodifyEditor.axaml" />
         
         <!--WIDGETS-->
-        <ResourceDictionary Source="Minimap.xaml" />
+        <ResourceDictionary Source="Minimap.axaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
