@@ -17,6 +17,11 @@ public partial class NodifyEditor : TemplatedControl
     protected const string ElementItemsHost = "PART_ItemsHost";
     protected const string ElementConnectionsHost = "PART_ConnectionsHost";
 
+    /// <summary>
+    /// Gets or sets the threshold distance (in pixels) for suppressing mouse actions like context menus during drag operations.
+    /// </summary>
+    public static double MouseActionSuppressionThreshold { get; set; } = 12d;
+
     #region Viewport Properties
 
     /// <summary>
