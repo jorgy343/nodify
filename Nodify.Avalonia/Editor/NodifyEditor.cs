@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Nodify;
 
@@ -184,6 +185,80 @@ public partial class NodifyEditor : TemplatedControl
     /// </summary>
     public Panel? ItemsHost { get; private set; }
 
+    /// <summary>
+    /// Gets a list of all <see cref="ItemContainer"/>s.
+    /// </summary>
+    /// <remarks>Cache the result before using it to avoid extra allocations.</remarks>
+    protected internal IReadOnlyCollection<ItemContainer> ItemContainers
+    {
+        get
+        {
+            // TODO: Implement once ItemsControl infrastructure is in place
+            return Array.Empty<ItemContainer>();
+        }
+    }
+
+    #endregion
+
+    #region Grid and Snapping Properties
+
+    public static readonly StyledProperty<uint> GridCellSizeProperty =
+        AvaloniaProperty.Register<NodifyEditor, uint>(
+            nameof(GridCellSize),
+            defaultValue: 1,
+            coerce: CoerceGridCellSize);
+
+    /// <summary>
+    /// Gets or sets the value of an invisible grid used to adjust locations (snapping) of <see cref="ItemContainer"/>s.
+    /// </summary>
+    public uint GridCellSize
+    {
+        get => GetValue(GridCellSizeProperty);
+        set => SetValue(GridCellSizeProperty, value);
+    }
+
+    private static uint CoerceGridCellSize(AvaloniaObject sender, uint value)
+        => value > 0u ? value : 1;
+
+    /// <summary>
+    /// Correct <see cref="ItemContainer"/>'s position after moving if starting position is not snapped to grid.
+    /// </summary>
+    public static bool EnableSnappingCorrection { get; set; } = true;
+
+    /// <summary>
+    /// Snaps the given value down to the nearest multiple of the grid cell size.
+    /// </summary>
+    /// <param name="value">The value to be snapped to the grid.</param>
+    /// <returns>The largest multiple of the grid cell size less than or equal to the value.</returns>
+    public double SnapToGrid(double value)
+    {
+        return (int)value / GridCellSize * GridCellSize;
+    }
+
+    #endregion
+
+    #region Connection Properties
+
+    public static readonly StyledProperty<System.Windows.Input.ICommand?> RemoveConnectionCommandProperty =
+        AvaloniaProperty.Register<NodifyEditor, System.Windows.Input.ICommand?>(nameof(RemoveConnectionCommand));
+
+    /// <summary>
+    /// Gets or sets the command to remove a connection.
+    /// </summary>
+    public System.Windows.Input.ICommand? RemoveConnectionCommand
+    {
+        get => GetValue(RemoveConnectionCommandProperty);
+        set => SetValue(RemoveConnectionCommandProperty, value);
+    }
+
+    protected void OnRemoveConnection(object? dataContext)
+    {
+        if (RemoveConnectionCommand?.CanExecute(dataContext) ?? false)
+        {
+            RemoveConnectionCommand.Execute(dataContext);
+        }
+    }
+
     #endregion
 
     #region Properties
@@ -338,6 +413,15 @@ public partial class NodifyEditor : TemplatedControl
         SelectedItemsProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
         {
             editor.OnSelectedItemsSourceChanged((IList?)e.OldValue, (IList?)e.NewValue);
+        });
+
+        // Dragging property handlers
+        IsDraggingPropertyKey.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+        {
+            if ((bool)e.NewValue! == true)
+                editor.OnItemsDragStarted();
+            else
+                editor.OnItemsDragCompleted();
         });
     }
 
