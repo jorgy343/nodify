@@ -1,9 +1,9 @@
-﻿using System.Windows.Controls;
-using System.Windows;
+﻿using Avalonia.Controls;
+using Avalonia;
 using System;
-using System.Windows.Controls.Primitives;
-using System.Windows.Media;
-using System.Windows.Input;
+using Avalonia.Controls.Primitives;
+using Avalonia.Media;
+using Avalonia.Input;
 
 namespace Nodify
 {

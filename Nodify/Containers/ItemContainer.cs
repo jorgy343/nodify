@@ -1,10 +1,10 @@
 ﻿using Nodify.Events;
 using Nodify.Interactivity;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.Media;
 
 namespace Nodify
 {

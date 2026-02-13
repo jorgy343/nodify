@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Media;
 
 namespace Nodify
 {

@@ -3,12 +3,12 @@ using Nodify.Interactivity;
 using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shapes;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Documents;
+using Avalonia.Input;
+using Avalonia.Media;
+using Avalonia.Controls.Shapes;
 
 namespace Nodify
 {

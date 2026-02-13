@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
 
 namespace Nodify
 {

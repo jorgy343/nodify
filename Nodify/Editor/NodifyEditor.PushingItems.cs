@@ -1,8 +1,8 @@
 ﻿using Nodify.Interactivity;
 using System.Diagnostics;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Shapes;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 
 namespace Nodify
 {

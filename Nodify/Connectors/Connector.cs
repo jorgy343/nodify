@@ -1,9 +1,9 @@
 ﻿using Nodify.Events;
 using Nodify.Interactivity;
 using System.Diagnostics;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
 
 namespace Nodify
 {
