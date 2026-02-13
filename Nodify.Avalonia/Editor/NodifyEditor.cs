@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using System;
+using System.Collections;
 
 namespace Nodify;
 
@@ -323,6 +324,20 @@ public partial class NodifyEditor : TemplatedControl
         DisableAutoPanningProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
         {
             editor.OnDisableAutoPanningChanged((bool)e.NewValue!);
+        });
+
+        // Selecting property handlers
+        IsSelectingPropertyKey.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+        {
+            if ((bool)e.NewValue! == true)
+                editor.OnItemsSelectStarted();
+            else
+                editor.OnItemsSelectCompleted();
+        });
+
+        SelectedItemsProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+        {
+            editor.OnSelectedItemsSourceChanged((IList?)e.OldValue, (IList?)e.NewValue);
         });
     }
 
