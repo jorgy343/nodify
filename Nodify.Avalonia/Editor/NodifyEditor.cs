@@ -313,6 +313,17 @@ public partial class NodifyEditor : TemplatedControl
         MinViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) => editor.OnMinViewportZoomChanged(e));
         MaxViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) => editor.OnMaxViewportZoomChanged(e));
         ItemsExtentProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) => editor.OnItemsExtentChanged(e));
+
+        // Panning property handlers
+        DisablePanningProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+        {
+            editor.OnDisableAutoPanningChanged(editor.DisableAutoPanning || editor.DisablePanning);
+        });
+
+        DisableAutoPanningProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+        {
+            editor.OnDisableAutoPanningChanged((bool)e.NewValue!);
+        });
     }
 
     public NodifyEditor()
