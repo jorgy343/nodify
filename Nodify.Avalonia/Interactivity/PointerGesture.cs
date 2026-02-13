@@ -6,7 +6,7 @@ namespace Nodify.Interactivity;
 /// <summary>
 /// Represents a pointer gesture that can be used to trigger input interactions.
 /// </summary>
-public class PointerGesture
+public class PointerGesture : Gesture
 {
     /// <summary>
     /// Gets the mouse button associated with this gesture.
@@ -42,7 +42,7 @@ public class PointerGesture
     /// <param name="source">The source of the event.</param>
     /// <param name="e">The event arguments.</param>
     /// <returns>True if the event matches this gesture; otherwise, false.</returns>
-    public virtual bool Matches(object? source, RoutedEventArgs e)
+    public override bool Matches(object? source, RoutedEventArgs e)
     {
         if (e is PointerPressedEventArgs pressedArgs)
         {

@@ -34,12 +34,12 @@ public abstract class DragState<TElement> : InputElementState<TElement>, IInputH
     /// <summary>
     /// Gets the gesture used to cancel the drag interaction, if defined.
     /// </summary>
-    protected PointerGesture? CancelGesture { get; }
+    protected Gesture? CancelGesture { get; }
 
     /// <summary>
     /// Gets the gesture used to begin the drag interaction.
     /// </summary>
-    protected PointerGesture BeginGesture { get; }
+    protected Gesture BeginGesture { get; }
 
     /// <summary>
     /// Indicates whether the element has a context menu associated with it.
@@ -75,7 +75,7 @@ public abstract class DragState<TElement> : InputElementState<TElement>, IInputH
     /// </summary>
     /// <param name="element">The element associated with this state.</param>
     /// <param name="beginGesture">The gesture used to start the drag interaction.</param>
-    public DragState(TElement element, PointerGesture beginGesture) : base(element)
+    public DragState(TElement element, Gesture beginGesture) : base(element)
     {
         BeginGesture = beginGesture;
         PositionElement = element;
@@ -87,7 +87,7 @@ public abstract class DragState<TElement> : InputElementState<TElement>, IInputH
     /// <param name="element">The element associated with this state.</param>
     /// <param name="beginGesture">The gesture used to start the drag interaction.</param>
     /// <param name="cancelGesture">The gesture used to cancel the drag interaction.</param>
-    public DragState(TElement element, PointerGesture beginGesture, PointerGesture cancelGesture)
+    public DragState(TElement element, Gesture beginGesture, Gesture cancelGesture)
         : this(element, beginGesture)
     {
         CancelGesture = cancelGesture;
