@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Nodify.Interactivity;
 using System;
 using System.Collections;
@@ -130,7 +131,7 @@ public partial class NodifyEditor : IKeyboardNavigationLayer, IKeyboardNavigatio
     {
     }
 
-    protected override void OnLostFocus(RoutedEventArgs e)
+    protected override void OnLostFocus(RoutedEventArgs? e)
     {
         base.OnLostFocus(e);
 

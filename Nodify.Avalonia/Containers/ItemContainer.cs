@@ -16,7 +16,7 @@ namespace Nodify;
 /// This is a functional implementation supporting location tracking, selection, and connector integration.
 /// Advanced features like dragging will be added when the full Interactivity system is ported.
 /// </remarks>
-public class ItemContainer : ContentControl, INodifyCanvasItem
+public class ItemContainer : ContentControl, INodifyCanvasItem, IKeyboardFocusTarget<ItemContainer>
 {
     #region Styled Properties
 
@@ -412,6 +412,14 @@ public class ItemContainer : ContentControl, INodifyCanvasItem
     {
         Arrange(rect);
     }
+
+    #endregion
+
+    #region IKeyboardFocusTarget Implementation
+
+    Rect IKeyboardFocusTarget<ItemContainer>.Bounds => GetBounds();
+
+    ItemContainer IKeyboardFocusTarget<ItemContainer>.Element => this;
 
     #endregion
 
