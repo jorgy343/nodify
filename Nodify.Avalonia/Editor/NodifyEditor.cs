@@ -186,6 +186,11 @@ public partial class NodifyEditor : TemplatedControl
     public Panel? ItemsHost { get; private set; }
 
     /// <summary>
+    /// Gets the element that holds all the <see cref="BaseConnection"/>s and custom connections.
+    /// </summary>
+    protected internal Visual? ConnectionsHost { get; private set; }
+
+    /// <summary>
     /// Gets a list of all <see cref="ItemContainer"/>s.
     /// </summary>
     /// <remarks>Cache the result before using it to avoid extra allocations.</remarks>
@@ -423,6 +428,15 @@ public partial class NodifyEditor : TemplatedControl
             else
                 editor.OnItemsDragCompleted();
         });
+
+        // Cutting property handlers
+        IsCuttingPropertyKey.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+        {
+            if ((bool)e.NewValue! == true)
+                editor.OnCuttingStarted();
+            else
+                editor.OnCuttingCompleted();
+        });
     }
 
     public NodifyEditor()
@@ -441,6 +455,9 @@ public partial class NodifyEditor : TemplatedControl
 
         // Get the items host panel from the template
         ItemsHost = e.NameScope.Find<Panel>(ElementItemsHost);
+
+        // Get the connections host visual from the template
+        ConnectionsHost = e.NameScope.Find<Visual>(ElementConnectionsHost);
     }
 
     #region Property Changed Handlers
