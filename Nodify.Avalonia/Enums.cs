@@ -117,3 +117,14 @@ public enum ArrowHeadShape
     /// </summary>
     Rectangle
 }
+
+/// <summary>
+/// The position of a connector on a node.
+/// </summary>
+public enum ConnectorPosition
+{
+    Top,
+    Left,
+    Bottom,
+    Right
+}
