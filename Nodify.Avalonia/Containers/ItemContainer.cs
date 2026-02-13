@@ -1,8 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nodify.Events;
+using Nodify.Interactivity;
 using System;
 
 namespace Nodify;
@@ -260,12 +262,22 @@ public class ItemContainer : ContentControl, INodifyCanvasItem
     {
         LocationProperty.Changed.AddClassHandler<ItemContainer>((item, e) => item.OnLocationPropertyChanged(e));
         IsSelectedProperty.Changed.AddClassHandler<ItemContainer>((item, e) => item.OnIsSelectedPropertyChanged(e));
+        FocusableProperty.OverrideDefaultValue<ItemContainer>(true);
     }
 
-    public ItemContainer()
+    /// <summary>
+    /// Constructs an instance of an <see cref="ItemContainer"/> in the specified <see cref="NodifyEditor"/>.
+    /// </summary>
+    /// <param name="editor">The editor that owns this container.</param>
+    public ItemContainer(NodifyEditor editor)
     {
+        Editor = editor;
+
         // Track size changes
         PropertyChanged += OnPropertyChanged;
+
+        // Setup input handling via the Interactivity system
+        InputProcessor.AddSharedHandlers(this);
     }
 
     private void OnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
@@ -445,6 +457,71 @@ public class ItemContainer : ContentControl, INodifyCanvasItem
     public void EndDragging()
     {
         // TODO: Implement when Interactivity system is ported
+    }
+
+    #endregion
+
+    #region Input Processing
+
+    protected InputProcessor InputProcessor { get; } = new InputProcessor();
+
+    /// <inheritdoc />
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    {
+        base.OnPointerPressed(e);
+        InputProcessor.ProcessEvent(e);
+    }
+
+    /// <inheritdoc />
+    protected override void OnPointerReleased(PointerReleasedEventArgs e)
+    {
+        base.OnPointerReleased(e);
+        InputProcessor.ProcessEvent(e);
+
+        // Release the pointer capture if all buttons are released and there's no interaction in progress
+        if (!InputProcessor.RequiresInputCapture && e.Pointer.Captured == this)
+        {
+            var props = e.GetCurrentPoint(this).Properties;
+            if (!props.IsLeftButtonPressed && !props.IsRightButtonPressed && !props.IsMiddleButtonPressed)
+            {
+                e.Pointer.Capture(null);
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void OnPointerMoved(PointerEventArgs e)
+    {
+        base.OnPointerMoved(e);
+        InputProcessor.ProcessEvent(e);
+    }
+
+    /// <inheritdoc />
+    protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
+    {
+        base.OnPointerWheelChanged(e);
+        InputProcessor.ProcessEvent(e);
+    }
+
+    /// <inheritdoc />
+    protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
+    {
+        base.OnPointerCaptureLost(e);
+        InputProcessor.ProcessEvent(e);
+    }
+
+    /// <inheritdoc />
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+        InputProcessor.ProcessEvent(e);
+    }
+
+    /// <inheritdoc />
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        InputProcessor.ProcessEvent(e);
     }
 
     #endregion
