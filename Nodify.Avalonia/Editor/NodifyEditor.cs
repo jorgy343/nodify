@@ -113,6 +113,73 @@ public partial class NodifyEditor : TemplatedControl
 
     #endregion
 
+    #region Editor State Properties
+
+    public static readonly StyledProperty<bool> HasCustomContextMenuProperty =
+        AvaloniaProperty.Register<NodifyEditor, bool>(nameof(HasCustomContextMenu), defaultValue: false);
+
+    private static readonly DirectProperty<NodifyEditor, bool> IsSelectingPropertyKey =
+        AvaloniaProperty.RegisterDirect<NodifyEditor, bool>(
+            nameof(IsSelecting),
+            o => o.IsSelecting);
+
+    private static readonly DirectProperty<NodifyEditor, bool> IsBulkUpdatingItemsPropertyKey =
+        AvaloniaProperty.RegisterDirect<NodifyEditor, bool>(
+            nameof(IsBulkUpdatingItems),
+            o => o.IsBulkUpdatingItems);
+
+    private static readonly DirectProperty<NodifyEditor, uint> SelectedContainersCountPropertyKey =
+        AvaloniaProperty.RegisterDirect<NodifyEditor, uint>(
+            nameof(SelectedContainersCount),
+            o => o.SelectedContainersCount);
+
+    private bool _isSelecting;
+    private bool _isBulkUpdatingItems;
+    private uint _selectedContainersCount;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the editor uses a custom context menu.
+    /// </summary>
+    public bool HasCustomContextMenu
+    {
+        get => GetValue(HasCustomContextMenuProperty);
+        set => SetValue(HasCustomContextMenuProperty, value);
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether a selection operation is currently in progress.
+    /// </summary>
+    public bool IsSelecting
+    {
+        get => _isSelecting;
+        internal set => SetAndRaise(IsSelectingPropertyKey, ref _isSelecting, value);
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the editor is bulk updating items (batch operation in progress).
+    /// </summary>
+    public bool IsBulkUpdatingItems
+    {
+        get => _isBulkUpdatingItems;
+        internal set => SetAndRaise(IsBulkUpdatingItemsPropertyKey, ref _isBulkUpdatingItems, value);
+    }
+
+    /// <summary>
+    /// Gets the number of currently selected containers.
+    /// </summary>
+    public uint SelectedContainersCount
+    {
+        get => _selectedContainersCount;
+        private set => SetAndRaise(SelectedContainersCountPropertyKey, ref _selectedContainersCount, value);
+    }
+
+    /// <summary>
+    /// Gets the items host panel (where ItemContainers are arranged).
+    /// </summary>
+    public Panel? ItemsHost { get; private set; }
+
+    #endregion
+
     #region Properties
 
     /// <summary>
@@ -250,6 +317,15 @@ public partial class NodifyEditor : TemplatedControl
         transformGroup.Children.Add(ScaleTransform);
         transformGroup.Children.Add(TranslateTransform);
         ViewportTransform = transformGroup;
+    }
+
+    /// <inheritdoc />
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+
+        // Get the items host panel from the template
+        ItemsHost = e.NameScope.Find<Panel>(ElementItemsHost);
     }
 
     #region Property Changed Handlers
