@@ -1,0 +1,23 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui">
+    <ResourceDictionary.MergedDictionaries>
+        <!--NODES-->
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/Node.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/KnotNode.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/GroupingNode.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/StateNode.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/Connector.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/NodeInput.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/NodeOutput.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/Connection.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/PendingConnection.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/CuttingLine.axaml" />
+
+        <!--CORE-->
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/ItemContainer.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/DecoratorContainer.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/NodifyEditor.axaml" />
+        
+        <!--WIDGETS-->
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/Minimap.axaml" />
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>
