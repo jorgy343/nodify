@@ -88,9 +88,9 @@ This project is currently in active development. Core utilities and base classes
 - ✅ Visual tree extension methods
 - ✅ Value converters
 - ✅ Basic Node control
+- ✅ Editor controls (NodifyEditor, NodifyCanvas, EditorCommands)
 
 ### In Progress
-- 🚧 Editor controls
 - 🚧 Connection controls
 - 🚧 Connector controls
 - 🚧 Interactivity system
