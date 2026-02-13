@@ -90,10 +90,11 @@ This project is currently in active development. Core utilities and base classes
 - ✅ Basic Node control
 - ✅ Editor controls (NodifyEditor, NodifyCanvas, EditorCommands)
 - ✅ Connection controls (BaseConnection, Connection, LineConnection)
+- ✅ Connector controls (Connector, PendingConnection, HotKeyControl) - *Partial implementation*
 
 ### In Progress
-- 🚧 Connector controls
-- 🚧 Interactivity system
+- 🚧 ItemContainer (required for full Connector functionality)
+- 🚧 Interactivity system (required for gesture handling)
 - 🚧 Themes and styles
 
 ### Planned
@@ -101,3 +102,13 @@ This project is currently in active development. Core utilities and base classes
 - ⏳ Sample applications
 - ⏳ Documentation
 - ⏳ Unit tests
+
+## Implementation Notes
+
+### Connector Controls (Partial Implementation)
+The Connector controls have been ported with the following limitations:
+- **ItemContainer dependencies**: Full anchor update logic requires ItemContainer with `Location`, `PreviewLocationChanged`, and `LocationChanged` properties
+- **NodifyEditor dependencies**: Hit testing and selection optimization require `ItemsHost`, `SelectedContainersCount`, and `HasCustomContextMenuProperty`
+- **Interactivity system**: Gesture handling (InputProcessor, ConnectorState handlers) will be implemented when the Interactivity system is ported
+
+These components compile successfully and provide the core API surface, but full functionality will be available once the dependent systems are complete.
