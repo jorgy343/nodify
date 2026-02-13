@@ -1,12 +1,13 @@
-﻿using Nodify.Interactivity;
-using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Nodify.Interactivity;
 
 namespace Nodify
 {
     internal static class EditorGesturesExtensions
     {
-        public static SelectionType GetSelectionType(this EditorGestures.SelectionGestures gestures, InputEventArgs e)
+        public static SelectionType GetSelectionType(this EditorGestures.SelectionGestures gestures, RoutedEventArgs e)
         {
             if (gestures.Append.Matches(e.Source, e))
             {
@@ -26,35 +27,35 @@ namespace Nodify
             return SelectionType.Replace;
         }
 
-        public static bool TryGetFocusDirection(this EditorGestures.DirectionalNavigationGestures gestures, InputEventArgs e, out FocusNavigationDirection direction)
+        public static bool TryGetFocusDirection(this EditorGestures.DirectionalNavigationGestures gestures, RoutedEventArgs e, out NavigationDirection direction)
         {
             direction = default;
 
             if (gestures.Left.Matches(e.Source, e))
             {
-                direction = FocusNavigationDirection.Left;
+                direction = NavigationDirection.Left;
                 return true;
             }
             if (gestures.Right.Matches(e.Source, e))
             {
-                direction = FocusNavigationDirection.Right;
+                direction = NavigationDirection.Right;
                 return true;
             }
             if (gestures.Up.Matches(e.Source, e))
             {
-                direction = FocusNavigationDirection.Up;
+                direction = NavigationDirection.Up;
                 return true;
             }
             if (gestures.Down.Matches(e.Source, e))
             {
-                direction = FocusNavigationDirection.Down;
+                direction = NavigationDirection.Down;
                 return true;
             }
 
             return false;
         }
 
-        public static bool TryGetNavigationDirection(this EditorGestures.DirectionalNavigationGestures gestures, InputEventArgs e, out Vector direction)
+        public static bool TryGetNavigationDirection(this EditorGestures.DirectionalNavigationGestures gestures, RoutedEventArgs e, out Vector direction)
         {
             double y = gestures.Up.Matches(e.Source, e) ? 1 : gestures.Down.Matches(e.Source, e) ? -1 : 0;
             double x = gestures.Left.Matches(e.Source, e) ? -1 : gestures.Right.Matches(e.Source, e) ? 1 : 0;
@@ -64,16 +65,16 @@ namespace Nodify
             return x != 0 || y != 0;
         }
 
-        public static bool IsOppositeOf(this FocusNavigationDirection direction, FocusNavigationDirection other)
+        public static bool IsOppositeOf(this NavigationDirection direction, NavigationDirection other)
         {
-            return (direction == FocusNavigationDirection.Left && other == FocusNavigationDirection.Right)
-                || (direction == FocusNavigationDirection.Right && other == FocusNavigationDirection.Left)
-                || (direction == FocusNavigationDirection.Up && other == FocusNavigationDirection.Down)
-                || (direction == FocusNavigationDirection.Down && other == FocusNavigationDirection.Up)
-                || (direction == FocusNavigationDirection.Next && other == FocusNavigationDirection.Previous)
-                || (direction == FocusNavigationDirection.Previous && other == FocusNavigationDirection.Next)
-                || (direction == FocusNavigationDirection.First && other == FocusNavigationDirection.Last)
-                || (direction == FocusNavigationDirection.Last && other == FocusNavigationDirection.First);
+            return (direction == NavigationDirection.Left && other == NavigationDirection.Right)
+                || (direction == NavigationDirection.Right && other == NavigationDirection.Left)
+                || (direction == NavigationDirection.Up && other == NavigationDirection.Down)
+                || (direction == NavigationDirection.Down && other == NavigationDirection.Up)
+                || (direction == NavigationDirection.Next && other == NavigationDirection.Previous)
+                || (direction == NavigationDirection.Previous && other == NavigationDirection.Next)
+                || (direction == NavigationDirection.First && other == NavigationDirection.Last)
+                || (direction == NavigationDirection.Last && other == NavigationDirection.First);
         }
     }
 }

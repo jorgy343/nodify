@@ -1,23 +1,27 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
 using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
+using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 
 namespace Nodify
 {
     public class ConnectionContainer : ContentPresenter, IKeyboardFocusTarget<ConnectionContainer>
     {
-        #region Dependency properties
+        #region Styled Properties
 
-        public static readonly DependencyProperty IsSelectableProperty = DependencyProperty.Register(nameof(IsSelectable), typeof(bool), typeof(ConnectionContainer), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty IsSelectedProperty = System.Windows.Controls.Primitives.Selector.IsSelectedProperty.AddOwner(typeof(ConnectionContainer), new FrameworkPropertyMetadata(BoxValue.False, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsSelectedChanged));
+        public static readonly StyledProperty<bool> IsSelectableProperty =
+            AvaloniaProperty.Register<ConnectionContainer, bool>(nameof(IsSelectable), false);
+        public static readonly StyledProperty<bool> IsSelectedProperty =
+            AvaloniaProperty.Register<ConnectionContainer, bool>(nameof(IsSelected), defaultBindingMode: BindingMode.TwoWay);
 
-        private static void OnIsSelectedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnIsSelectedChanged(ConnectionContainer elem, AvaloniaPropertyChangedEventArgs e)
         {
-            var elem = (ConnectionContainer)d;
-            bool result = elem.IsSelectable && (bool)e.NewValue;
+            bool result = elem.IsSelectable && e.GetNewValue<bool>();
             elem.IsSelected = result;
             elem.OnSelectedChanged(result);
         }
@@ -37,21 +41,23 @@ namespace Nodify
         /// </summary>
         public bool IsSelected
         {
-            get => (bool)GetValue(IsSelectedProperty);
+            get => GetValue(IsSelectedProperty);
             set => SetValue(IsSelectedProperty, value);
         }
 
         #endregion
 
-        #region Routed events
+        #region Routed Events
 
-        public static readonly RoutedEvent SelectedEvent = System.Windows.Controls.Primitives.Selector.SelectedEvent.AddOwner(typeof(ConnectionContainer));
-        public static readonly RoutedEvent UnselectedEvent = System.Windows.Controls.Primitives.Selector.UnselectedEvent.AddOwner(typeof(ConnectionContainer));
+        public static readonly RoutedEvent<RoutedEventArgs> SelectedEvent =
+            RoutedEvent.Register<ConnectionContainer, RoutedEventArgs>(nameof(Selected), RoutingStrategies.Bubble);
+        public static readonly RoutedEvent<RoutedEventArgs> UnselectedEvent =
+            RoutedEvent.Register<ConnectionContainer, RoutedEventArgs>(nameof(Unselected), RoutingStrategies.Bubble);
 
         /// <summary>
         /// Occurs when this <see cref="ConnectionContainer"/> is selected.
         /// </summary>
-        public event RoutedEventHandler Selected
+        public event EventHandler<RoutedEventArgs> Selected
         {
             add => AddHandler(SelectedEvent, value);
             remove => RemoveHandler(SelectedEvent, value);
@@ -60,7 +66,7 @@ namespace Nodify
         /// <summary>
         /// Occurs when this <see cref="ConnectionContainer"/> is unselected.
         /// </summary>
-        public event RoutedEventHandler Unselected
+        public event EventHandler<RoutedEventArgs> Unselected
         {
             add => AddHandler(UnselectedEvent, value);
             remove => RemoveHandler(UnselectedEvent, value);
@@ -68,50 +74,45 @@ namespace Nodify
 
         #endregion
 
-        private FrameworkElement? _connection;
+        private Control? _connection;
         private SelectionType? _selectionType;
 
-        public Rect Bounds => ConnectionFocusTarget.Bounds;
+        Rect IKeyboardFocusTarget<ConnectionContainer>.Bounds => ConnectionFocusTarget.Bounds;
         ConnectionContainer IKeyboardFocusTarget<ConnectionContainer>.Element => this;
 
-        private IKeyboardFocusTarget<FrameworkElement> ConnectionFocusTarget => Connection as IKeyboardFocusTarget<FrameworkElement>
-            ?? throw new NotSupportedException($"Custom connections must implement {nameof(IKeyboardFocusTarget<FrameworkElement>)} for keyboard navigation. Or disable keyboard navigation for the connections layer.");
+        private IKeyboardFocusTarget<Control> ConnectionFocusTarget => Connection as IKeyboardFocusTarget<Control>
+            ?? throw new NotSupportedException($"Custom connections must implement {nameof(IKeyboardFocusTarget<Control>)} for keyboard navigation. Or disable keyboard navigation for the connections layer.");
 
-        public FrameworkElement? Connection => _connection ??= BaseConnection.PrioritizeBaseConnectionForSelection
-            ? this.GetChildOfType<BaseConnection>() ?? this.GetChildOfType<FrameworkElement>()
-            : this.GetChildOfType<FrameworkElement>();
+        public Control? Connection => _connection ??= BaseConnection.PrioritizeBaseConnectionForSelection
+            ? this.GetChildOfType<BaseConnection>() ?? this.GetChildOfType<Control>()
+            : this.GetChildOfType<Control>();
 
         public ConnectionsMultiSelector Selector { get; }
 
         static ConnectionContainer()
         {
-            FocusableProperty.OverrideMetadata(typeof(ConnectionContainer), new FrameworkPropertyMetadata(BoxValue.True));
-            FocusVisualStyleProperty.OverrideMetadata(typeof(ConnectionContainer), new FrameworkPropertyMetadata(new Style()));
-
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(ConnectionContainer), new FrameworkPropertyMetadata(KeyboardNavigationMode.Cycle));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(ConnectionContainer), new FrameworkPropertyMetadata(KeyboardNavigationMode.Cycle));
+            FocusableProperty.OverrideDefaultValue<ConnectionContainer>(true);
+            IsSelectedProperty.Changed.AddClassHandler<ConnectionContainer>(OnIsSelectedChanged);
+            IsFocusedProperty.Changed.AddClassHandler<ConnectionContainer>((c, _) => c.OnIsFocusedChanged());
+            KeyboardNavigation.TabNavigationProperty.OverrideDefaultValue<ConnectionContainer>(KeyboardNavigationMode.Cycle);
+            KeyboardNavigation.DirectionalNavigationProperty.OverrideDefaultValue<ConnectionContainer>(KeyboardNavigationMode.Cycle);
         }
 
         public ConnectionContainer(ConnectionsMultiSelector selector)
         {
             Selector = selector;
+            DetachedFromVisualTree += OnDetachedFromVisualTree;
         }
 
-        protected override void OnVisualParentChanged(DependencyObject oldParent)
+        private void OnDetachedFromVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
         {
-            if (VisualTreeHelper.GetParent(this) == null && IsKeyboardFocusWithin)
+            if (IsKeyboardFocusWithin)
             {
-                base.OnVisualParentChanged(oldParent);
-
                 Selector.Editor?.Focus();
             }
-            else
-            {
-                base.OnVisualParentChanged(oldParent);
-            }
         }
 
-        protected override void OnIsKeyboardFocusedChanged(DependencyPropertyChangedEventArgs e)
+        private void OnIsFocusedChanged()
         {
             if (Connection is BaseConnection baseConnection)
             {
@@ -135,16 +136,18 @@ namespace Nodify
             RaiseEvent(new RoutedEventArgs(newValue ? SelectedEvent : UnselectedEvent, this));
         }
 
-        protected override void OnMouseDown(MouseButtonEventArgs e)
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
             EditorGestures.ConnectionGestures gestures = EditorGestures.Mappings.Connection;
+            var props = e.GetCurrentPoint(null).Properties;
+
             if (IsSelectable && gestures.Selection.Select.Matches(e.Source, e))
             {
                 _selectionType = gestures.Selection.GetSelectionType(e);
             }
             // Replaces the current selection when right-clicking on an element that has a context menu and is not selected.
             // Applies only when the select gesture is not right click.
-            else if (e.ChangedButton == MouseButton.Right && Connection?.ContextMenu != null)
+            else if (props.PointerUpdateKind == PointerUpdateKind.RightButtonPressed && Connection?.ContextMenu != null)
             {
                 _selectionType = IsSelected ? SelectionType.Append : SelectionType.Replace;
             }
@@ -156,15 +159,15 @@ namespace Nodify
             }
         }
 
-        protected override void OnMouseUp(MouseButtonEventArgs e)
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             if (_selectionType.HasValue)
             {
-                // Determine whether the current selection should remain intact or be replaced by the clicked item. 
-                // If the right mouse button is pressed on an already selected item, and the item either has an 
+                // Determine whether the current selection should remain intact or be replaced by the clicked item.
+                // If the right mouse button is pressed on an already selected item, and the item either has an
                 // explicit context menu, the selection remains unchanged.
                 // This ensures that the context menu applies to the entire selection rather than only the clicked item.
-                bool allowContextMenu = e.ChangedButton == MouseButton.Right && IsSelected && Connection?.ContextMenu != null;
+                bool allowContextMenu = e.InitialPressMouseButton == MouseButton.Right && IsSelected && Connection?.ContextMenu != null;
                 if (!allowContextMenu)
                 {
                     Select(_selectionType.Value);

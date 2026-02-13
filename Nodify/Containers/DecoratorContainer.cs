@@ -1,8 +1,10 @@
-﻿using Nodify.Interactivity;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
+using Nodify.Interactivity;
+using System;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Data;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 
 namespace Nodify
 {
@@ -11,17 +13,20 @@ namespace Nodify
     /// </summary>
     public class DecoratorContainer : ContentControl, INodifyCanvasItem, IKeyboardFocusTarget<DecoratorContainer>
     {
-        #region Dependency Properties
+        #region Styled Properties
 
-        public static readonly DependencyProperty LocationProperty = ItemContainer.LocationProperty.AddOwner(typeof(DecoratorContainer), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | FrameworkPropertyMetadataOptions.AffectsParentArrange, OnLocationChanged));
-        public static readonly DependencyProperty ActualSizeProperty = ItemContainer.ActualSizeProperty.AddOwner(typeof(DecoratorContainer));
+        public static readonly StyledProperty<Point> LocationProperty =
+            ItemContainer.LocationProperty.AddOwner<DecoratorContainer>(
+                new StyledPropertyMetadata<Point>(defaultBindingMode: BindingMode.TwoWay));
+        public static readonly StyledProperty<Size> ActualSizeProperty =
+            ItemContainer.ActualSizeProperty.AddOwner<DecoratorContainer>();
 
         /// <summary>
         /// Gets or sets the location of this <see cref="DecoratorContainer"/> inside the <see cref="NodifyEditor.DecoratorsHost"/>.
         /// </summary>
         public Point Location
         {
-            get => (Point)GetValue(LocationProperty);
+            get => GetValue(LocationProperty);
             set => SetValue(LocationProperty, value);
         }
 
@@ -30,13 +35,12 @@ namespace Nodify
         /// </summary>
         public Size ActualSize
         {
-            get => (Size)GetValue(ActualSizeProperty);
+            get => GetValue(ActualSizeProperty);
             set => SetValue(ActualSizeProperty, value);
         }
 
-        private static void OnLocationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnLocationChanged(DecoratorContainer item, AvaloniaPropertyChangedEventArgs e)
         {
-            var item = (DecoratorContainer)d;
             item.OnLocationChanged();
         }
 
@@ -44,12 +48,13 @@ namespace Nodify
 
         #region Routed Events
 
-        public static readonly RoutedEvent LocationChangedEvent = EventManager.RegisterRoutedEvent(nameof(LocationChanged), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(DecoratorContainer));
+        public static readonly RoutedEvent<RoutedEventArgs> LocationChangedEvent =
+            RoutedEvent.Register<DecoratorContainer, RoutedEventArgs>(nameof(LocationChanged), RoutingStrategies.Bubble);
 
         /// <summary>
         /// Occurs when the <see cref="Location"/> of this <see cref="DecoratorContainer"/> is changed.
         /// </summary>
-        public event RoutedEventHandler LocationChanged
+        public event EventHandler<RoutedEventArgs> LocationChanged
         {
             add => AddHandler(LocationChangedEvent, value);
             remove => RemoveHandler(LocationChangedEvent, value);
@@ -65,7 +70,7 @@ namespace Nodify
 
         #endregion
 
-        public Rect Bounds => new Rect(Location, ActualSize);
+        Rect IKeyboardFocusTarget<DecoratorContainer>.Bounds => new Rect(Location, ActualSize);
         DecoratorContainer IKeyboardFocusTarget<DecoratorContainer>.Element => this;
 
         private DecoratorsControl? _owner;
@@ -73,39 +78,34 @@ namespace Nodify
 
         static DecoratorContainer()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(DecoratorContainer), new FrameworkPropertyMetadata(typeof(DecoratorContainer)));
-            FocusableProperty.OverrideMetadata(typeof(DecoratorContainer), new FrameworkPropertyMetadata(BoxValue.True));
-
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(DecoratorContainer), new FrameworkPropertyMetadata(KeyboardNavigationMode.Cycle));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(DecoratorContainer), new FrameworkPropertyMetadata(KeyboardNavigationMode.Cycle));
+            FocusableProperty.OverrideDefaultValue<DecoratorContainer>(true);
+            AffectsParentArrange<DecoratorContainer>(LocationProperty);
+            LocationProperty.Changed.AddClassHandler<DecoratorContainer>(OnLocationChanged);
         }
 
         public DecoratorContainer(DecoratorsControl parent)
         {
             _owner = parent;
+            SizeChanged += OnSizeChanged;
+            DetachedFromVisualTree += OnDetachedFromVisualTree;
         }
 
         public DecoratorContainer()
         {
+            SizeChanged += OnSizeChanged;
+            DetachedFromVisualTree += OnDetachedFromVisualTree;
         }
 
-        /// <inheritdoc />
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        private void OnSizeChanged(object? sender, SizeChangedEventArgs e)
         {
-            SetCurrentValue(ActualSizeProperty, sizeInfo.NewSize);
+            ActualSize = e.NewSize;
         }
 
-        protected override void OnVisualParentChanged(DependencyObject oldParent)
+        private void OnDetachedFromVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
         {
-            if (VisualTreeHelper.GetParent(this) == null && IsKeyboardFocusWithin)
+            if (IsKeyboardFocusWithin)
             {
-                base.OnVisualParentChanged(oldParent);
-
                 Owner?.Editor?.Focus();
-            }
-            else
-            {
-                base.OnVisualParentChanged(oldParent);
             }
         }
     }

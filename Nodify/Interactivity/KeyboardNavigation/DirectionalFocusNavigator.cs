@@ -1,13 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
     internal readonly struct DirectionalFocusNavigator<TElement>
-        where TElement : UIElement, IKeyboardFocusTarget<TElement>
+        where TElement : Control, IKeyboardFocusTarget<TElement>
     {
         private readonly IEnumerable<IKeyboardFocusTarget<TElement>> _availableTargets;
 
@@ -22,26 +23,26 @@ namespace Nodify.Interactivity
 
             IEnumerable<IKeyboardFocusTarget<TElement>> candidates = request.FocusNavigationDirection switch
             {
-                FocusNavigationDirection.Left => _availableTargets.Where(c => c.Bounds.Left < currentContainerBounds.Left),
-                FocusNavigationDirection.Right => _availableTargets.Where(c => c.Bounds.Left > currentContainerBounds.Left),
-                FocusNavigationDirection.Up => _availableTargets.Where(c => c.Bounds.Top < currentContainerBounds.Top),
-                FocusNavigationDirection.Down => _availableTargets.Where(c => c.Bounds.Top > currentContainerBounds.Top),
-                FocusNavigationDirection.Previous => FindCandidatesLinearly(currentContainer, request),
-                FocusNavigationDirection.Next => FindCandidatesLinearly(currentContainer, request),
-                FocusNavigationDirection.First => FindCandidatesLinearly(currentContainer, request),
-                FocusNavigationDirection.Last => FindCandidatesLinearly(currentContainer, request),
+                NavigationDirection.Left => _availableTargets.Where(c => c.Bounds.Left < currentContainerBounds.Left),
+                NavigationDirection.Right => _availableTargets.Where(c => c.Bounds.Left > currentContainerBounds.Left),
+                NavigationDirection.Up => _availableTargets.Where(c => c.Bounds.Top < currentContainerBounds.Top),
+                NavigationDirection.Down => _availableTargets.Where(c => c.Bounds.Top > currentContainerBounds.Top),
+                NavigationDirection.Previous => FindCandidatesLinearly(currentContainer, request),
+                NavigationDirection.Next => FindCandidatesLinearly(currentContainer, request),
+                NavigationDirection.First => FindCandidatesLinearly(currentContainer, request),
+                NavigationDirection.Last => FindCandidatesLinearly(currentContainer, request),
                 _ => Array.Empty<IKeyboardFocusTarget<TElement>>()
             };
 
-            // Wrap focus if no candidates found in the current direction  
+            // Wrap focus if no candidates found in the current direction
             if (!candidates.Any())
             {
                 candidates = request.FocusNavigationDirection switch
                 {
-                    FocusNavigationDirection.Left => _availableTargets.OrderByDescending(c => c.Bounds.Left).Take(1),
-                    FocusNavigationDirection.Right => _availableTargets.OrderBy(c => c.Bounds.Left).Take(1),
-                    FocusNavigationDirection.Up => _availableTargets.OrderByDescending(c => c.Bounds.Top).Take(1),
-                    FocusNavigationDirection.Down => _availableTargets.OrderBy(c => c.Bounds.Top).Take(1),
+                    NavigationDirection.Left => _availableTargets.OrderByDescending(c => c.Bounds.Left).Take(1),
+                    NavigationDirection.Right => _availableTargets.OrderBy(c => c.Bounds.Left).Take(1),
+                    NavigationDirection.Up => _availableTargets.OrderByDescending(c => c.Bounds.Top).Take(1),
+                    NavigationDirection.Down => _availableTargets.OrderBy(c => c.Bounds.Top).Take(1),
                     _ => Array.Empty<IKeyboardFocusTarget<TElement>>()
                 };
 
@@ -53,7 +54,8 @@ namespace Nodify.Interactivity
 
             foreach (var candidate in candidates)
             {
-                double distanceSquared = (candidate.Bounds.TopLeft - currentContainerBounds.TopLeft).LengthSquared;
+                var v = candidate.Bounds.TopLeft - currentContainerBounds.TopLeft;
+                double distanceSquared = v.X * v.X + v.Y * v.Y;
                 if (distanceSquared < minDistanceSquared)
                 {
                     minDistanceSquared = distanceSquared;

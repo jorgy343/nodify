@@ -1,6 +1,6 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Windows;
+using Avalonia;
+using Avalonia.Interactivity;
 
 namespace Nodify.Events
 {
@@ -33,11 +33,8 @@ namespace Nodify.Events
         public Vector Offset { get; set; }
 
         /// <summary>
-        /// Gets a collection of <see cref="FrameworkElement.DataContext"/>s of the <see cref="ItemContainer"/>s associated with this event.
+        /// Gets a collection of <see cref="StyledElement.DataContext"/>s of the <see cref="ItemContainer"/>s associated with this event.
         /// </summary>
         public IReadOnlyCollection<object> Items { get; }
-
-        protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
-            => ((ItemsMovedEventHandler)genericHandler)(genericTarget, this);
     }
 }

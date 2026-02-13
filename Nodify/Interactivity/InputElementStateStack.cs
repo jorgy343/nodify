@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Input;
+using System.Collections.Generic;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
     /// <summary>
-    /// Manages a stack of input states for a UI element, enabling complex input interactions.
+    /// Manages a stack of input states for a control, enabling complex input interactions.
     /// </summary>
-    /// <typeparam name="TElement">The type of the associated FrameworkElement.</typeparam>
+    /// <typeparam name="TElement">The type of the associated Control.</typeparam>
     public partial class InputElementStateStack<TElement> : IInputHandler
-        where TElement : FrameworkElement
+        where TElement : Control
     {
         private readonly Stack<IInputElementState> _states = new Stack<IInputElementState>();
 
@@ -25,7 +26,6 @@ namespace Nodify.Interactivity
         /// <summary>
         /// Initializes a new instance of the <see cref="InputElementStateStack{TElement}"/> class.
         /// </summary>
-        /// <param name="element">The element associated with this state stack.</param>
         public InputElementStateStack(TElement element)
         {
             Element = element;
@@ -37,8 +37,6 @@ namespace Nodify.Interactivity
         public IInputElementState State => _states.Peek();
 
         /// <summary>Pushes a new state into the stack.</summary>
-        /// <param name="newState">The new state.</param>
-        /// <remarks>Calls <see cref="IInputElementState.Enter"/> on the new state.</remarks>
         public void PushState(IInputElementState newState)
         {
             var prev = _states.Count > 0 ? State : null;
@@ -47,12 +45,8 @@ namespace Nodify.Interactivity
         }
 
         /// <summary>Pops the current state from the stack.</summary>
-        /// <remarks>It doesn't pop the initial state.
-        /// <br />Calls <see cref="IInputElementState.Exit"/> on the current state.
-        /// <br />Calls <see cref="IInputElementState.Enter"/> on the new state.</remarks>
         public void PopState()
         {
-            // Never remove the default state
             if (_states.Count > 1)
             {
                 IInputElementState prev = _states.Pop();
@@ -62,10 +56,6 @@ namespace Nodify.Interactivity
         }
 
         /// <summary>Pops all states from the stack.</summary>
-        /// <remarks>It doesn't pop the initial state.
-        /// <br />Calls <see cref="IInputElementState.Exit"/> on the current state.
-        /// <br />Calls <see cref="IInputElementState.Enter"/> on the previous state.
-        /// </remarks>
         public void PopAllStates()
         {
             while (_states.Count > 1)
@@ -74,11 +64,11 @@ namespace Nodify.Interactivity
             }
         }
 
-        public void HandleEvent(InputEventArgs e)
+        public void HandleEvent(RoutedEventArgs e)
         {
             State.HandleEvent(e);
 
-            if (e.RoutedEvent == UIElement.LostMouseCaptureEvent)
+            if (e.RoutedEvent == InputElement.PointerCaptureLostEvent)
             {
                 PopAllStates();
             }
@@ -92,7 +82,6 @@ namespace Nodify.Interactivity
             /// <summary>
             /// Invoked when entering this state from another state.
             /// </summary>
-            /// <param name="from">The state being exited, or null if entering from no prior state.</param>
             void Enter(IInputElementState? from);
 
             /// <summary>

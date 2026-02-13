@@ -1,4 +1,4 @@
-﻿using System.Windows.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
@@ -7,7 +7,7 @@ namespace Nodify.Interactivity
     {
         public static readonly MultiGesture None = new MultiGesture(Match.Any);
 
-        /// <summary>The strategy used by <see cref="Matches(object, InputEventArgs)"/>.</summary>
+        /// <summary>The strategy used by <see cref="Matches(object, RoutedEventArgs)"/>.</summary>
         public enum Match
         {
             /// <summary>At least one gesture must match.</summary>
@@ -29,7 +29,7 @@ namespace Nodify.Interactivity
         }
 
         /// <inheritdoc />
-        public override bool Matches(object targetElement, InputEventArgs inputEventArgs)
+        public override bool Matches(object? targetElement, RoutedEventArgs inputEventArgs)
         {
             if (_match == Match.Any)
             {
@@ -39,7 +39,7 @@ namespace Nodify.Interactivity
             return MatchesAll(targetElement, inputEventArgs);
         }
 
-        private bool MatchesAll(object targetElement, InputEventArgs inputEventArgs)
+        private bool MatchesAll(object? targetElement, RoutedEventArgs inputEventArgs)
         {
             for (int i = 0; i < _gestures.Length; i++)
             {
@@ -52,7 +52,7 @@ namespace Nodify.Interactivity
             return true;
         }
 
-        private bool MatchesAny(object targetElement, InputEventArgs inputEventArgs)
+        private bool MatchesAny(object? targetElement, RoutedEventArgs inputEventArgs)
         {
             for (int i = 0; i < _gestures.Length; i++)
             {

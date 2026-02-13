@@ -1,8 +1,8 @@
-﻿using System.Windows;
+using Avalonia.Controls;
 
 namespace Nodify.Interactivity
 {
-    public partial class InputElementStateStack<TElement> where TElement : FrameworkElement
+    public partial class InputElementStateStack<TElement> where TElement : Control
     {
         /// <summary>
         /// Base class for defining input element states.
@@ -17,7 +17,6 @@ namespace Nodify.Interactivity
             /// <summary>
             /// Initializes a new instance of the <see cref="InputElementState"/> class.
             /// </summary>
-            /// <param name="stack">The state stack managing this state.</param>
             public InputElementState(InputElementStateStack<TElement> stack) : base(stack.Element)
             {
                 Stack = stack;
@@ -30,7 +29,6 @@ namespace Nodify.Interactivity
             /// <summary>
             /// Pushes a new state onto the stack.
             /// </summary>
-            /// <param name="newState">The new state to push.</param>
             public void PushState(IInputElementState newState)
                 => Stack.PushState(newState);
 

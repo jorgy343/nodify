@@ -1,30 +1,30 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Selection;
+using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.VisualTree;
 
 namespace Nodify
 {
-    public class ConnectionsMultiSelector : MultiSelector, IKeyboardNavigationLayer
+    public class ConnectionsMultiSelector : ListBox, IKeyboardNavigationLayer
     {
-        #region Dependency Properties
+        #region Styled Properties
 
-        public static readonly DependencyProperty SelectedItemsProperty = NodifyEditor.SelectedItemsProperty.AddOwner(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(default(IList), OnSelectedItemsSourceChanged));
-        public static readonly DependencyProperty CanSelectMultipleItemsProperty = NodifyEditor.CanSelectMultipleItemsProperty.AddOwner(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(BoxValue.True, OnCanSelectMultipleItemsChanged, CoerceCanSelectMultipleItems));
+        public static readonly StyledProperty<IList?> SelectedItemsProperty =
+            NodifyEditor.SelectedItemsProperty.AddOwner<ConnectionsMultiSelector>();
+        public static readonly StyledProperty<bool> CanSelectMultipleItemsProperty =
+            NodifyEditor.CanSelectMultipleItemsProperty.AddOwner<ConnectionsMultiSelector>();
 
-        private static void OnCanSelectMultipleItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-            => ((ConnectionsMultiSelector)d).CanSelectMultipleItemsBase = (bool)e.NewValue;
-
-        private static object CoerceCanSelectMultipleItems(DependencyObject d, object baseValue)
-            => ((ConnectionsMultiSelector)d).CanSelectMultipleItemsBase = (bool)baseValue;
-
-        private static void OnSelectedItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-            => ((ConnectionsMultiSelector)d).OnSelectedItemsSourceChanged((IList)e.OldValue, (IList)e.NewValue);
+        private static void OnCanSelectMultipleItemsChanged(ConnectionsMultiSelector d, AvaloniaPropertyChangedEventArgs e)
+            => d.SelectionMode = e.GetNewValue<bool>() ? SelectionMode.Multiple : SelectionMode.Single;
 
         /// <summary>
         /// Gets or sets the selected connections in the <see cref="NodifyEditor"/>.
@@ -44,12 +44,6 @@ namespace Nodify
             set => SetValue(CanSelectMultipleItemsProperty, value);
         }
 
-        private bool CanSelectMultipleItemsBase
-        {
-            get => base.CanSelectMultipleItems;
-            set => base.CanSelectMultipleItems = value;
-        }
-
         #endregion
 
         /// <summary>
@@ -65,12 +59,12 @@ namespace Nodify
         {
             get
             {
-                ItemCollection items = Items;
-                var containers = new List<ConnectionContainer>(items.Count);
+                var count = ItemCount;
+                var containers = new List<ConnectionContainer>(count);
 
-                for (var i = 0; i < items.Count; i++)
+                for (var i = 0; i < count; i++)
                 {
-                    containers.Add((ConnectionContainer)ItemContainerGenerator.ContainerFromIndex(i));
+                    containers.Add((ConnectionContainer)ContainerFromIndex(i)!);
                 }
 
                 return containers;
@@ -79,27 +73,37 @@ namespace Nodify
 
         static ConnectionsMultiSelector()
         {
-            FocusableProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(BoxValue.False));
-
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
+            FocusableProperty.OverrideDefaultValue<ConnectionsMultiSelector>(false);
+            KeyboardNavigation.TabNavigationProperty.OverrideDefaultValue<ConnectionsMultiSelector>(KeyboardNavigationMode.None);
+            KeyboardNavigation.DirectionalNavigationProperty.OverrideDefaultValue<ConnectionsMultiSelector>(KeyboardNavigationMode.None);
+            SelectedItemsProperty.Changed.AddClassHandler<ConnectionsMultiSelector>(
+                (d, e) => d.OnSelectedItemsSourceChanged((IList?)e.OldValue, (IList?)e.NewValue));
+            CanSelectMultipleItemsProperty.Changed.AddClassHandler<ConnectionsMultiSelector>(OnCanSelectMultipleItemsChanged);
         }
 
         public ConnectionsMultiSelector()
         {
             _focusNavigator = new StatefulFocusNavigator<ConnectionContainer>(OnElementFocused);
+            SelectionMode = SelectionMode.Multiple;
         }
 
-        protected override DependencyObject GetContainerForItemOverride()
+        protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey)
+        {
+            if (item is ConnectionContainer)
+            {
+                recycleKey = null;
+                return false;
+            }
+            recycleKey = typeof(ConnectionContainer);
+            return true;
+        }
+
+        protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
             => new ConnectionContainer(this);
 
-        protected override bool IsItemItsOwnContainerOverride(object item)
-            => item is ConnectionContainer;
-
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplate(e);
 
             Editor = this.GetParentOfType<NodifyEditor>();
 
@@ -112,7 +116,7 @@ namespace Nodify
         #region Keyboard Navigation
 
         public KeyboardNavigationLayerId Id { get; } = KeyboardNavigationLayerId.Connections;
-        public IKeyboardFocusTarget<UIElement>? LastFocusedElement => _focusNavigator.LastFocusedElement;
+        public IKeyboardFocusTarget<Control>? LastFocusedElement => _focusNavigator.LastFocusedElement;
 
         private readonly StatefulFocusNavigator<ConnectionContainer> _focusNavigator;
 
@@ -134,15 +138,15 @@ namespace Nodify
             {
                 containerToFocus = FindNextFocusTarget(focusedContainer, request);
             }
-            else if (currentElement is UIElement elem && elem.GetParentOfType<ConnectionContainer>() is ConnectionContainer parentContainer)
+            else if (currentElement is Control elem && elem.GetParentOfType<ConnectionContainer>() is ConnectionContainer parentContainer)
             {
                 containerToFocus = parentContainer;
             }
-            else if (Items.Count > 0 && Editor != null)
+            else if (ItemCount > 0 && Editor != null)
             {
                 var viewport = new Rect(Editor.ViewportLocation, Editor.ViewportSize);
                 var containers = ConnectionContainers;
-                containerToFocus = containers.FirstOrDefault(container => viewport.IntersectsWith(((IKeyboardFocusTarget<ConnectionContainer>)container).Bounds))
+                containerToFocus = containers.FirstOrDefault(container => viewport.Intersects(((IKeyboardFocusTarget<ConnectionContainer>)container).Bounds))
                     ?? containers.First();
             }
 
@@ -178,27 +182,23 @@ namespace Nodify
 
         public void Select(ConnectionContainer container)
         {
-            BeginUpdateSelectedItems();
-            var selected = base.SelectedItems;
-            selected.Clear();
-            selected.Add(container.DataContext);
+            var baseSelected = base.SelectedItems;
+            if (baseSelected == null)
+                return;
 
-#if NETCOREAPP3_0_OR_GREATER
-            // For some reason the ConnectionContainer.IsSelected property change is not triggered, which prevents the visual update of the child connection.
-            // To address this, we manually set the IsSelected property before it is automatically set to true by EndUpdateSelectedItems.
-            // Note: This approach will cause bindings to update out of order.
-            // It is recommended to handle undo/redo operations using the SelectionChanged event in this case.
-            container.IsSelected = true;
-#endif
-
-            EndUpdateSelectedItems();
+            using (Selection.BatchUpdate())
+            {
+                baseSelected.Clear();
+                baseSelected.Add(container.DataContext);
+                container.IsSelected = true;
+            }
 
             Editor?.UnselectAll();
         }
 
         #region Selection Handlers
 
-        private void OnSelectedItemsSourceChanged(IList oldValue, IList newValue)
+        private void OnSelectedItemsSourceChanged(IList? oldValue, IList? newValue)
         {
             if (oldValue is INotifyCollectionChanged oc)
             {
@@ -210,18 +210,21 @@ namespace Nodify
                 nc.CollectionChanged += OnSelectedItemsChanged;
             }
 
-            IList selectedItems = base.SelectedItems;
+            var baseSelected = base.SelectedItems;
+            if (baseSelected == null)
+                return;
 
-            BeginUpdateSelectedItems();
-            selectedItems.Clear();
-            if (newValue != null)
+            using (Selection.BatchUpdate())
             {
-                for (var i = 0; i < newValue.Count; i++)
+                baseSelected.Clear();
+                if (newValue != null)
                 {
-                    selectedItems.Add(newValue[i]);
+                    for (var i = 0; i < newValue.Count; i++)
+                    {
+                        baseSelected.Add(newValue[i]);
+                    }
                 }
             }
-            EndUpdateSelectedItems();
         }
 
         private void OnSelectedItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -229,20 +232,23 @@ namespace Nodify
             if (!CanSelectMultipleItems)
                 return;
 
+            var baseSelected = base.SelectedItems;
+            if (baseSelected == null)
+                return;
+
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Reset:
-                    base.SelectedItems.Clear();
+                    baseSelected.Clear();
                     break;
 
                 case NotifyCollectionChangedAction.Add:
                     IList? newItems = e.NewItems;
                     if (newItems != null)
                     {
-                        IList selectedItems = base.SelectedItems;
                         for (var i = 0; i < newItems.Count; i++)
                         {
-                            selectedItems.Add(newItems[i]);
+                            baseSelected.Add(newItems[i]);
                         }
                     }
                     break;
@@ -251,10 +257,9 @@ namespace Nodify
                     IList? oldItems = e.OldItems;
                     if (oldItems != null)
                     {
-                        IList selectedItems = base.SelectedItems;
                         for (var i = 0; i < oldItems.Count; i++)
                         {
-                            selectedItems.Remove(oldItems[i]);
+                            baseSelected.Remove(oldItems[i]);
                         }
                     }
                     break;

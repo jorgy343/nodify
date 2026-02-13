@@ -1,14 +1,15 @@
-﻿using System.Windows;
-using System.Windows.Input;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
     /// <summary>
-    /// Represents a base class for handling input events in a specific state for a framework element.
+    /// Represents a base class for handling input events in a specific state for a control.
     /// </summary>
-    /// <typeparam name="TElement">The type of the framework element that owns this state.</typeparam>
+    /// <typeparam name="TElement">The type of the control that owns this state.</typeparam>
     public abstract class InputElementState<TElement> : IInputHandler
-        where TElement : FrameworkElement
+        where TElement : Control
     {
         /// <summary>
         /// Gets the owner of the state.
@@ -21,70 +22,67 @@ namespace Nodify.Interactivity
         /// <summary>
         /// Initializes a new instance of the <see cref="InputElementState{TElement}"/> class.
         /// </summary>
-        /// <param name="element">The framework element that owns this state.</param>
         protected InputElementState(TElement element)
         {
             Element = element;
         }
 
-        /// <inheritdoc cref="UIElement.OnMouseDown(MouseButtonEventArgs)"/>
-        protected virtual void OnMouseDown(MouseButtonEventArgs e) { }
+        /// <summary>Called when a pointer button is pressed.</summary>
+        protected virtual void OnPointerPressed(PointerPressedEventArgs e) { }
 
-        /// <inheritdoc cref="UIElement.OnMouseUp(MouseButtonEventArgs)"/>
-        protected virtual void OnMouseUp(MouseButtonEventArgs e) { }
+        /// <summary>Called when a pointer button is released.</summary>
+        protected virtual void OnPointerReleased(PointerReleasedEventArgs e) { }
 
-        /// <inheritdoc cref="UIElement.OnMouseMove(MouseEventArgs)"/>
-        protected virtual void OnMouseMove(MouseEventArgs e) { }
+        /// <summary>Called when the pointer moves.</summary>
+        protected virtual void OnPointerMoved(PointerEventArgs e) { }
 
-        /// <inheritdoc cref="UIElement.OnMouseWheel(MouseWheelEventArgs)"/>
-        protected virtual void OnMouseWheel(MouseWheelEventArgs e) { }
+        /// <summary>Called when the mouse wheel changes.</summary>
+        protected virtual void OnPointerWheelChanged(PointerWheelChangedEventArgs e) { }
 
-        /// <inheritdoc cref="UIElement.OnKeyUp(KeyEventArgs)"/>
+        /// <summary>Called when a key is released.</summary>
         protected virtual void OnKeyUp(KeyEventArgs e) { }
 
-        /// <inheritdoc cref="UIElement.OnKeyDown(KeyEventArgs)"/>
+        /// <summary>Called when a key is pressed.</summary>
         protected virtual void OnKeyDown(KeyEventArgs e) { }
 
-        /// <inheritdoc cref="UIElement.OnLostMouseCapture(MouseEventArgs)"/>
-        protected virtual void OnLostMouseCapture(MouseEventArgs e) { }
+        /// <summary>Called when pointer capture is lost.</summary>
+        protected virtual void OnPointerCaptureLost(PointerCaptureLostEventArgs e) { }
 
         /// <summary>
         /// Called for any input event that is not explicitly handled by other methods.
         /// </summary>
-        /// <param name="e">The input event arguments.</param>
-        protected virtual void OnEvent(InputEventArgs e) { }
+        protected virtual void OnEvent(RoutedEventArgs e) { }
 
         /// <summary>
         /// Processes the input event by invoking the appropriate handler method based on the routed event.
         /// </summary>
-        /// <param name="e">The input event arguments.</param>
-        public void HandleEvent(InputEventArgs e)
+        public void HandleEvent(RoutedEventArgs e)
         {
-            if (e.RoutedEvent == UIElement.MouseMoveEvent)
+            if (e.RoutedEvent == InputElement.PointerMovedEvent)
             {
-                OnMouseMove((MouseEventArgs)e);
+                OnPointerMoved((PointerEventArgs)e);
             }
-            else if (e.RoutedEvent == UIElement.MouseDownEvent)
+            else if (e.RoutedEvent == InputElement.PointerPressedEvent)
             {
-                OnMouseDown((MouseButtonEventArgs)e);
+                OnPointerPressed((PointerPressedEventArgs)e);
             }
-            else if (e.RoutedEvent == UIElement.MouseUpEvent)
+            else if (e.RoutedEvent == InputElement.PointerReleasedEvent)
             {
-                OnMouseUp((MouseButtonEventArgs)e);
+                OnPointerReleased((PointerReleasedEventArgs)e);
             }
-            else if (e.RoutedEvent == UIElement.MouseWheelEvent)
+            else if (e.RoutedEvent == InputElement.PointerWheelChangedEvent)
             {
-                OnMouseWheel((MouseWheelEventArgs)e);
+                OnPointerWheelChanged((PointerWheelChangedEventArgs)e);
             }
-            else if (e.RoutedEvent == UIElement.LostMouseCaptureEvent)
+            else if (e.RoutedEvent == InputElement.PointerCaptureLostEvent)
             {
-                OnLostMouseCapture((MouseEventArgs)e);
+                OnPointerCaptureLost((PointerCaptureLostEventArgs)e);
             }
-            else if (e.RoutedEvent == UIElement.KeyDownEvent)
+            else if (e.RoutedEvent == InputElement.KeyDownEvent)
             {
                 OnKeyDown((KeyEventArgs)e);
             }
-            else if (e.RoutedEvent == UIElement.KeyUpEvent)
+            else if (e.RoutedEvent == InputElement.KeyUpEvent)
             {
                 OnKeyUp((KeyEventArgs)e);
             }

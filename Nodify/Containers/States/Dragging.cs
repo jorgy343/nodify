@@ -1,5 +1,6 @@
-﻿using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
@@ -14,29 +15,29 @@ namespace Nodify.Interactivity
             private Point _previousMousePosition;
 
             /// <summary>Constructs an instance of the <see cref="Dragging"/> state.</summary>
-            /// <param name="container">The owner of the state.</param>
+            /// <param name="stack">The owner of the state.</param>
             public Dragging(InputElementStateStack<ItemContainer> stack)
                 : base(stack, EditorGestures.Mappings.ItemContainer.Drag, EditorGestures.Mappings.ItemContainer.CancelAction)
             {
                 PositionElement = Element.Editor;
             }
 
-            protected override void OnBegin(InputEventArgs e)
+            protected override void OnBegin(RoutedEventArgs e)
             {
                 _previousMousePosition = Element.Editor.MouseLocation;
                 Element.BeginDragging();
             }
 
-            protected override void OnMouseMove(MouseEventArgs e)
+            protected override void OnPointerMoved(PointerEventArgs e)
             {
                 Element.UpdateDragging(Element.Editor.MouseLocation - _previousMousePosition);
                 _previousMousePosition = Element.Editor.MouseLocation;
             }
 
-            protected override void OnEnd(InputEventArgs e)
+            protected override void OnEnd(RoutedEventArgs e)
                 => Element.EndDragging();
 
-            protected override void OnCancel(InputEventArgs e)
+            protected override void OnCancel(RoutedEventArgs e)
                 => Element.CancelDragging();
         }
     }

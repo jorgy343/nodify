@@ -1,17 +1,17 @@
-﻿using System;
-using System.Windows.Input;
-using System.Windows;
+using System;
+using Avalonia.Controls;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
     internal class StatefulFocusNavigator<TElement>
-        where TElement : UIElement, IKeyboardFocusTarget<TElement>
+        where TElement : Control, IKeyboardFocusTarget<TElement>
     {
         public delegate bool FindNextFocusTargetDelegate(TElement? currentElement, TraversalRequest request, out TElement? elementToFocus);
 
         private readonly WeakReference<TElement?> _previousFocusedElement = new WeakReference<TElement?>(null);
         private readonly WeakReference<TElement?> _lastFocusedElement = new WeakReference<TElement?>(null);
-        private FocusNavigationDirection? _previousFocusNavigationDirection;
+        private NavigationDirection? _previousFocusNavigationDirection;
 
         private readonly Action<IKeyboardFocusTarget<TElement>> _onFocus;
 
@@ -24,7 +24,9 @@ namespace Nodify.Interactivity
 
         public bool TryMoveFocus(TraversalRequest request, FindNextFocusTargetDelegate findNext)
         {
-            var currentTarget = Keyboard.FocusedElement as TElement;
+            // In Avalonia, we don't have a global Keyboard.FocusedElement.
+            // The currently focused element within the navigation context is tracked by the caller.
+            TElement? currentTarget = null;
 
             // If the request is in the opposite direction of the last focus navigation, try to restore the previous focused container
             if (_previousFocusedElement.TryGetTarget(out var prevTarget)
@@ -56,7 +58,7 @@ namespace Nodify.Interactivity
         {
             if (_lastFocusedElement.TryGetTarget(out var lastTarget))
             {
-                if (lastTarget!.IsKeyboardFocused)
+                if (lastTarget!.IsFocused)
                 {
                     return true;
                 }

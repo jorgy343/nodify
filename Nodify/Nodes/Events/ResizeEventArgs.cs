@@ -1,5 +1,5 @@
-﻿using System;
-using System.Windows;
+using Avalonia;
+using Avalonia.Interactivity;
 
 namespace Nodify.Events
 {
@@ -31,13 +31,9 @@ namespace Nodify.Events
         /// </summary>
         public Size PreviousSize { get; }
 
-        
         /// <summary>
         /// Gets the new size of the object.
         /// </summary>
         public Size NewSize { get; }
-
-        protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
-            => ((ResizeEventHandler)genericHandler)(genericTarget, this);
     }
 }

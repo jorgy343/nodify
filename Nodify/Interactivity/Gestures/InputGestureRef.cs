@@ -1,10 +1,10 @@
-﻿using System.Windows.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
     /// <summary>
     /// An input gesture that allows changing its logic at runtime without changing its reference.
-    /// Useful for classes that capture the object reference without the posibility of updating it. (e.g. <see cref="EditorCommands"/>)
+    /// Useful for classes that capture the object reference without the possibility of updating it.
     /// </summary>
     public sealed class InputGestureRef : InputGesture
     {
@@ -18,15 +18,12 @@ namespace Nodify.Interactivity
             Value = gesture;
         }
 
-        public override bool Matches(object targetElement, InputEventArgs inputEventArgs)
+        public override bool Matches(object? targetElement, RoutedEventArgs inputEventArgs)
         {
             return Value.Matches(targetElement, inputEventArgs);
         }
 
         public static implicit operator InputGestureRef(MouseGesture gesture)
-            => new InputGestureRef { Value = gesture };
-
-        public static implicit operator InputGestureRef(System.Windows.Input.MouseGesture gesture)
             => new InputGestureRef { Value = gesture };
 
         public static implicit operator InputGestureRef(KeyGesture gesture)

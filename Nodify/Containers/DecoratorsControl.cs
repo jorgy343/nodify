@@ -1,9 +1,11 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.VisualTree;
 
 namespace Nodify
 {
@@ -25,12 +27,12 @@ namespace Nodify
         {
             get
             {
-                ItemCollection items = Items;
-                var containers = new List<DecoratorContainer>(items.Count);
+                var count = ItemCount;
+                var containers = new List<DecoratorContainer>(count);
 
-                for (var i = 0; i < items.Count; i++)
+                for (var i = 0; i < count; i++)
                 {
-                    containers.Add((DecoratorContainer)ItemContainerGenerator.ContainerFromIndex(i));
+                    containers.Add((DecoratorContainer)ContainerFromIndex(i)!);
                 }
 
                 return containers;
@@ -39,11 +41,9 @@ namespace Nodify
 
         static DecoratorsControl()
         {
-            FocusableProperty.OverrideMetadata(typeof(DecoratorsControl), new FrameworkPropertyMetadata(BoxValue.False));
-
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
+            FocusableProperty.OverrideDefaultValue<DecoratorsControl>(false);
+            KeyboardNavigation.TabNavigationProperty.OverrideDefaultValue<DecoratorsControl>(KeyboardNavigationMode.None);
+            KeyboardNavigation.DirectionalNavigationProperty.OverrideDefaultValue<DecoratorsControl>(KeyboardNavigationMode.None);
         }
 
         public DecoratorsControl()
@@ -52,16 +52,24 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        protected override bool IsItemItsOwnContainerOverride(object item)
-            => item is DecoratorContainer;
+        protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey)
+        {
+            if (item is DecoratorContainer)
+            {
+                recycleKey = null;
+                return false;
+            }
+            recycleKey = typeof(DecoratorContainer);
+            return true;
+        }
 
         /// <inheritdoc />
-        protected override DependencyObject GetContainerForItemOverride()
+        protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
             => new DecoratorContainer(this);
 
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplate(e);
 
             Editor = this.GetParentOfType<NodifyEditor>();
 
@@ -74,7 +82,7 @@ namespace Nodify
         #region Keyboard Navigation
 
         public KeyboardNavigationLayerId Id { get; } = KeyboardNavigationLayerId.Decorators;
-        public IKeyboardFocusTarget<UIElement>? LastFocusedElement => _focusNavigator.LastFocusedElement;
+        public IKeyboardFocusTarget<Control>? LastFocusedElement => _focusNavigator.LastFocusedElement;
 
         private readonly StatefulFocusNavigator<DecoratorContainer> _focusNavigator;
 
@@ -96,15 +104,15 @@ namespace Nodify
             {
                 containerToFocus = FindNextFocusTarget(focusedContainer, request);
             }
-            else if (currentElement is UIElement elem && elem.GetParentOfType<DecoratorContainer>() is DecoratorContainer parentContainer)
+            else if (currentElement is Control elem && elem.GetParentOfType<DecoratorContainer>() is DecoratorContainer parentContainer)
             {
                 containerToFocus = parentContainer;
             }
-            else if (Items.Count > 0 && Editor != null)
+            else if (ItemCount > 0 && Editor != null)
             {
                 var viewport = new Rect(Editor.ViewportLocation, Editor.ViewportSize);
                 var containers = DecoratorContainers;
-                containerToFocus = containers.FirstOrDefault(container => viewport.IntersectsWith(((IKeyboardFocusTarget<DecoratorContainer>)container).Bounds))
+                containerToFocus = containers.FirstOrDefault(container => viewport.Intersects(((IKeyboardFocusTarget<DecoratorContainer>)container).Bounds))
                     ?? containers.First();
             }
 

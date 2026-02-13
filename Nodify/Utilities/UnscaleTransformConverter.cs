@@ -1,20 +1,20 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Media;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
 
 namespace Nodify
 {
     internal sealed class UnscaleTransformConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            Transform result = (Transform)((TransformGroup)value).Children[0].Inverse;
+            Transform result = (Transform)((TransformGroup)value!).Children[0].Inverse!;
             return result;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             return value;
         }
@@ -22,29 +22,21 @@ namespace Nodify
 
     internal sealed class ScaleDoubleConverter : IMultiValueConverter
     {
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            double result = (double)values[0] * (double)values[1];
+            double result = (double)values[0]! * (double)values[1]!;
             return result;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 
     internal sealed class ScalePointConverter : IMultiValueConverter
     {
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            Point result = (Point)((Vector)(Point)values[0] * (double)values[1]);
+            var point = (Avalonia.Point)values[0]!;
+            var scale = (double)values[1]!;
+            var result = new Avalonia.Point(point.X * scale, point.Y * scale);
             return result;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

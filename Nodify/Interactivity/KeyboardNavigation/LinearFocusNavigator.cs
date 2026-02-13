@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Input;
+using Avalonia.Controls;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
     internal readonly struct LinearFocusNavigator<TElement>
-        where TElement : UIElement, IKeyboardFocusTarget<TElement>
+        where TElement : Control, IKeyboardFocusTarget<TElement>
     {
         private enum LinearNavigationDirection
         {
@@ -27,7 +27,7 @@ namespace Nodify.Interactivity
         {
             var direction = IsBackward(request.FocusNavigationDirection) ? LinearNavigationDirection.Backward
                 : IsForward(request.FocusNavigationDirection) ? LinearNavigationDirection.Forward
-                : request.FocusNavigationDirection == FocusNavigationDirection.First ? LinearNavigationDirection.First : LinearNavigationDirection.Last;
+                : request.FocusNavigationDirection == NavigationDirection.First ? LinearNavigationDirection.First : LinearNavigationDirection.Last;
 
             var availableTargets = _availableTargets as List<IKeyboardFocusTarget<TElement>> ?? _availableTargets.ToList();
             int currentIndex = availableTargets.IndexOf(currentContainer);
@@ -41,7 +41,7 @@ namespace Nodify.Interactivity
                 _ => null
             };
 
-            // Wrap focus if no candidates found in the current direction  
+            // Wrap focus if no candidates found in the current direction
             if (candidate is null)
             {
                 candidate = direction switch
@@ -57,14 +57,14 @@ namespace Nodify.Interactivity
             return candidate;
         }
 
-        private static bool IsForward(FocusNavigationDirection dir)
+        private static bool IsForward(NavigationDirection dir)
         {
-            return dir == FocusNavigationDirection.Right || dir == FocusNavigationDirection.Up || dir == FocusNavigationDirection.Next;
+            return dir == NavigationDirection.Right || dir == NavigationDirection.Up || dir == NavigationDirection.Next;
         }
 
-        private static bool IsBackward(FocusNavigationDirection dir)
+        private static bool IsBackward(NavigationDirection dir)
         {
-            return dir == FocusNavigationDirection.Left || dir == FocusNavigationDirection.Down || dir == FocusNavigationDirection.Previous;
+            return dir == NavigationDirection.Left || dir == NavigationDirection.Down || dir == NavigationDirection.Previous;
         }
     }
 }

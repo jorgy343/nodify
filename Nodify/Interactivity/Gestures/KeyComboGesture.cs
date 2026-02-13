@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using System.Windows.Input;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
@@ -32,44 +32,33 @@ namespace Nodify.Interactivity
 
         static KeyComboGesture()
         {
-            EventManager.RegisterClassHandler(typeof(UIElement), UIElement.PreviewKeyUpEvent, new KeyEventHandler(HandleKeyUp), true);
-            EventManager.RegisterClassHandler(typeof(UIElement), UIElement.LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(HandleFocusLost), true);
+            InputElement.KeyUpEvent.AddClassHandler<InputElement>(
+                (_, e) => HandleKeyUp(e),
+                RoutingStrategies.Tunnel,
+                handledEventsToo: true);
+
+            InputElement.LostFocusEvent.AddClassHandler<InputElement>(
+                (_, e) => HandleFocusLost(e),
+                handledEventsToo: true);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyComboGesture"/> class with the specified trigger and combo keys.
+        /// Initializes a new instance of the <see cref="KeyComboGesture"/> class.
         /// </summary>
-        /// <param name="triggerKey">The key that must be pressed first.</param>
-        /// <param name="comboKey">The combo key pressed while the trigger key is held.</param>
-        public KeyComboGesture(Key triggerKey, Key comboKey) : this(triggerKey, comboKey, ModifierKeys.None, string.Empty)
+        public KeyComboGesture(Key triggerKey, Key comboKey) : this(triggerKey, comboKey, KeyModifiers.None)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyComboGesture"/> class with the specified trigger and combo keys and modifiers.
+        /// Initializes a new instance of the <see cref="KeyComboGesture"/> class with modifiers.
         /// </summary>
-        /// <param name="triggerKey">The key that must be pressed first.</param>
-        /// <param name="comboKey">The combo key pressed while the trigger key is held.</param>
-        /// <param name="modifiers">Any modifier keys required for the combo key.</param>
-        public KeyComboGesture(Key triggerKey, Key comboKey, ModifierKeys modifiers) : this(triggerKey, comboKey, modifiers, string.Empty)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KeyComboGesture"/> class with the specified trigger key,
-        /// combo key, modifiers, and display string.
-        /// </summary>
-        /// <param name="triggerKey">The key that must be pressed first.</param>
-        /// <param name="comboKey">The combo key pressed while the trigger key is held.</param>
-        /// <param name="modifiers">Any modifier keys required for the combo key.</param>
-        /// <param name="displayString">The display string representing the gesture.</param>
-        public KeyComboGesture(Key triggerKey, Key comboKey, ModifierKeys modifiers, string displayString) : base(comboKey, modifiers, displayString)
+        public KeyComboGesture(Key triggerKey, Key comboKey, KeyModifiers modifiers) : base(comboKey, modifiers)
         {
             TriggerKey = triggerKey;
             _allCombos.Add(this);
         }
 
-        private static void HandleFocusLost(object sender, KeyboardFocusChangedEventArgs e)
+        private static void HandleFocusLost(RoutedEventArgs e)
         {
             foreach (var combo in _allCombos)
             {
@@ -77,13 +66,12 @@ namespace Nodify.Interactivity
             }
         }
 
-        private static void HandleKeyUp(object sender, KeyEventArgs e)
+        private static void HandleKeyUp(KeyEventArgs e)
         {
             foreach (var combo in _allCombos)
             {
                 if (e.Key == combo.TriggerKey)
                 {
-                    // We don't want to handle the event if only the trigger key was pressed.
                     if (combo.HasBeenPerformedAtLeastOnce)
                     {
                         e.Handled = true;
@@ -99,16 +87,20 @@ namespace Nodify.Interactivity
             _comboCounter = 0;
         }
 
-        public override bool Matches(object targetElement, InputEventArgs inputEventArgs)
+        /// <inheritdoc />
+        public override bool Matches(object? targetElement, RoutedEventArgs inputEventArgs)
         {
-            if (inputEventArgs is KeyEventArgs { IsDown: true } keyArgs)
+            // Only trigger on key down events
+            if (inputEventArgs.RoutedEvent != InputElement.KeyDownEvent)
+                return false;
+
+            if (inputEventArgs is KeyEventArgs keyArgs)
             {
                 if (keyArgs.Key == TriggerKey)
                 {
                     _isTriggerDown = true;
                 }
 
-                // The combo key only triggers the combo on key down
                 bool matches = _isTriggerDown && base.Matches(targetElement, inputEventArgs);
                 if (!matches)
                 {

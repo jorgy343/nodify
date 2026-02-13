@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
@@ -21,8 +21,8 @@ namespace Nodify.Interactivity
 
                 private bool PreserveSelectionOnRightClick => Element.HasContextMenu || ItemContainer.PreserveSelectionOnRightClick;
 
-                /// <summary>Creates a new instance of the <see cref="ContainerSelectingState"/>.</summary>
-                /// <param name="container">The owner of the state.</param>
+                /// <summary>Creates a new instance of the <see cref="SelectingState"/>.</summary>
+                /// <param name="stack">The owner of the state.</param>
                 public SelectingState(InputElementStateStack<ItemContainer> stack) : base(stack)
                 {
                 }
@@ -35,7 +35,7 @@ namespace Nodify.Interactivity
                     _initialPosition = Element.Editor.MouseLocation;
                 }
 
-                protected override void OnMouseDown(MouseButtonEventArgs e)
+                protected override void OnPointerPressed(PointerPressedEventArgs e)
                 {
                     if (!Element.IsSelectableLocation(e.GetPosition(Element)))
                     {
@@ -45,8 +45,8 @@ namespace Nodify.Interactivity
                     EditorGestures.ItemContainerGestures gestures = EditorGestures.Mappings.ItemContainer;
                     if (gestures.Drag.Matches(e.Source, e))
                     {
-                        // Dragging requires mouse capture
-                        _isDragging = Element.IsDraggable && CanCaptureMouse();
+                        // Dragging requires pointer capture
+                        _isDragging = Element.IsDraggable && CanCapturePointer(e);
                     }
 
                     if (gestures.Selection.Select.Matches(e.Source, e))
@@ -55,7 +55,7 @@ namespace Nodify.Interactivity
                     }
                     // Replaces the current selection when right-clicking on an element that has a context menu and is not selected.
                     // Applies only when the select gesture is not right click.
-                    else if (e.ChangedButton == MouseButton.Right && PreserveSelectionOnRightClick)
+                    else if (e.GetCurrentPoint(null).Properties.PointerUpdateKind == PointerUpdateKind.RightButtonPressed && PreserveSelectionOnRightClick)
                     {
                         _selectionType = Element.IsSelected ? SelectionType.Append : SelectionType.Replace;
                     }
@@ -65,15 +65,16 @@ namespace Nodify.Interactivity
                     if (_isDragging || _selectionType.HasValue)
                     {
                         e.Handled = true;
-                        CaptureMouseSafe();
+                        CapturePointerSafe(e);
                     }
                 }
 
                 /// <inheritdoc />
-                protected override void OnMouseMove(MouseEventArgs e)
+                protected override void OnPointerMoved(PointerEventArgs e)
                 {
                     double dragThreshold = NodifyEditor.MouseActionSuppressionThreshold * NodifyEditor.MouseActionSuppressionThreshold;
-                    double dragDistance = (Element.Editor.MouseLocation - _initialPosition).LengthSquared;
+                    var delta = Element.Editor.MouseLocation - _initialPosition;
+                    double dragDistance = delta.X * delta.X + delta.Y * delta.Y;
 
                     if (_isDragging && (dragDistance > dragThreshold))
                     {
@@ -88,16 +89,16 @@ namespace Nodify.Interactivity
                 }
 
                 /// <inheritdoc />
-                protected override void OnMouseUp(MouseButtonEventArgs e)
+                protected override void OnPointerReleased(PointerReleasedEventArgs e)
                 {
                     if (_selectionType.HasValue)
                     {
-                        // Determine whether the current selection should remain intact or be replaced by the clicked item. 
-                        // If the right mouse button is pressed on an already selected item, and the item either has an 
-                        // explicit context menu or is configured to preserve the selection on right-click, the selection 
-                        // remains unchanged. This ensures that the context menu applies to the entire selection rather 
+                        // Determine whether the current selection should remain intact or be replaced by the clicked item.
+                        // If the right mouse button is pressed on an already selected item, and the item either has an
+                        // explicit context menu or is configured to preserve the selection on right-click, the selection
+                        // remains unchanged. This ensures that the context menu applies to the entire selection rather
                         // than only the clicked item.
-                        bool allowContextMenu = e.ChangedButton == MouseButton.Right && Element.IsSelected && PreserveSelectionOnRightClick;
+                        bool allowContextMenu = e.InitialPressMouseButton == MouseButton.Right && Element.IsSelected && PreserveSelectionOnRightClick;
                         if (!allowContextMenu)
                         {
                             Element.Select(_selectionType.Value);
@@ -108,18 +109,18 @@ namespace Nodify.Interactivity
                     _selectionType = null;
                 }
 
-                private void CaptureMouseSafe()
+                private void CapturePointerSafe(PointerPressedEventArgs e)
                 {
-                    // Avoid stealing mouse capture from other elements
-                    if (CanCaptureMouse())
+                    // Avoid stealing pointer capture from other elements
+                    if (CanCapturePointer(e))
                     {
                         Element.Focus();
-                        Element.CaptureMouse();
+                        e.Pointer.Capture(Element);
                     }
                 }
 
-                private bool CanCaptureMouse()
-                    => Mouse.Captured == null || Element.IsMouseCaptured;
+                private bool CanCapturePointer(PointerPressedEventArgs e)
+                    => e.Pointer.Captured == null || e.Pointer.Captured == Element;
 
                 private static SelectionType GetSelectionTypeForDragging(SelectionType? selectionType)
                 {

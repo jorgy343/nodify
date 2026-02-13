@@ -1,5 +1,5 @@
-﻿using System;
-using System.Windows;
+using Avalonia;
+using Avalonia.Interactivity;
 
 namespace Nodify.Events
 {
@@ -18,7 +18,7 @@ namespace Nodify.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectorEventArgs"/> class using the specified <see cref="Connector"/>.
         /// </summary>
-        /// <param name="connector">The <see cref="FrameworkElement.DataContext"/> of a related <see cref="Nodify.Connector"/>.</param>
+        /// <param name="connector">The <see cref="StyledElement.DataContext"/> of a related <see cref="Nodify.Connector"/>.</param>
         public ConnectorEventArgs(object connector)
             => Connector = connector;
 
@@ -28,11 +28,8 @@ namespace Nodify.Events
         public Point Anchor { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="FrameworkElement.DataContext"/> of the <see cref="Nodify.Connector"/> associated with this event.
+        /// Gets the <see cref="StyledElement.DataContext"/> of the <see cref="Nodify.Connector"/> associated with this event.
         /// </summary>
         public object Connector { get; }
-
-        protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
-            => ((ConnectorEventHandler)genericHandler)(genericTarget, this);
     }
 }

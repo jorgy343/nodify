@@ -1,4 +1,4 @@
-﻿using System.Windows.Input;
+﻿using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
@@ -24,9 +24,9 @@ namespace Nodify.Interactivity
             public SelectionGestures(MouseAction mouseAction, bool ignoreModifierKeysOnRelease)
             {
                 Replace = new MouseGesture(mouseAction);
-                Remove = new MouseGesture(mouseAction, ModifierKeys.Alt, ignoreModifierKeysOnRelease);
-                Append = new MouseGesture(mouseAction, ModifierKeys.Shift, ignoreModifierKeysOnRelease);
-                Invert = new MouseGesture(mouseAction, ModifierKeys.Control, ignoreModifierKeysOnRelease);
+                Remove = new MouseGesture(mouseAction, KeyModifiers.Alt, ignoreModifierKeysOnRelease);
+                Append = new MouseGesture(mouseAction, KeyModifiers.Shift, ignoreModifierKeysOnRelease);
+                Invert = new MouseGesture(mouseAction, KeyModifiers.Control, ignoreModifierKeysOnRelease);
                 Select = new AnyGesture(Replace, Remove, Append, Invert);
                 Cancel = new KeyGesture(Key.Escape);
             }
@@ -67,15 +67,15 @@ namespace Nodify.Interactivity
             public InputGestureRef Replace { get; }
 
             /// <summary>Gesture to remove the selected items from the previous selection.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Alt"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Alt"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
             public InputGestureRef Remove { get; }
 
             /// <summary>Gesture to add the new selected items to the previous selection.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Shift"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Shift"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
             public InputGestureRef Append { get; }
 
             /// <summary>Gesture to invert the selected items.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Control"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
             public InputGestureRef Invert { get; }
 
             /// <summary>Cancel the current selection operation reverting to the previous selection.</summary>
@@ -159,7 +159,7 @@ namespace Nodify.Interactivity
         /// </summary>
         public class DirectionalNavigationGestures
         {
-            public DirectionalNavigationGestures(ModifierKeys modifierKeys = ModifierKeys.None)
+            public DirectionalNavigationGestures(KeyModifiers modifierKeys = KeyModifiers.None)
             {
                 Up = new KeyGesture(Key.Up, modifierKeys);
                 Left = new KeyGesture(Key.Left, modifierKeys);
@@ -167,7 +167,7 @@ namespace Nodify.Interactivity
                 Right = new KeyGesture(Key.Right, modifierKeys);
             }
 
-            public DirectionalNavigationGestures(Key triggerKey, ModifierKeys modifierKeys = ModifierKeys.None, bool repeated = false)
+            public DirectionalNavigationGestures(Key triggerKey, KeyModifiers modifierKeys = KeyModifiers.None, bool repeated = false)
             {
                 Up = new KeyComboGesture(triggerKey, Key.Up, modifierKeys) { AllowRepeatingComboKey = repeated };
                 Left = new KeyComboGesture(triggerKey, Key.Left, modifierKeys) { AllowRepeatingComboKey = repeated };
@@ -228,12 +228,12 @@ namespace Nodify.Interactivity
                 public KeyboardGestures()
                 {
                     Pan = new DirectionalNavigationGestures(Key.Space, repeated: true);
-                    DragSelection = new DirectionalNavigationGestures(ModifierKeys.Control);
-                    NavigateSelection = new DirectionalNavigationGestures(ModifierKeys.None);
+                    DragSelection = new DirectionalNavigationGestures(KeyModifiers.Control);
+                    NavigateSelection = new DirectionalNavigationGestures(KeyModifiers.None);
                     ToggleSelected = new AnyGesture(new KeyGesture(Key.Space), new KeyGesture(Key.Enter));
                     DeselectAll = new KeyGesture(Key.Escape);
-                    NextNavigationLayer = new KeyGesture(Key.OemCloseBrackets, ModifierKeys.Control);
-                    PrevNavigationLayer = new KeyGesture(Key.OemOpenBrackets, ModifierKeys.Control);
+                    NextNavigationLayer = new KeyGesture(Key.OemCloseBrackets, KeyModifiers.Control);
+                    PrevNavigationLayer = new KeyGesture(Key.OemOpenBrackets, KeyModifiers.Control);
                 }
 
                 /// <summary>
@@ -245,7 +245,7 @@ namespace Nodify.Interactivity
                 /// <summary>
                 /// Directional gestures used for dragging the selected items.
                 /// </summary>
-                /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+arrow keys.</remarks>
+                /// <remarks>Defaults to <see cref="KeyModifiers.Control"/>+arrow keys.</remarks>
                 public DirectionalNavigationGestures DragSelection { get; }
 
                 /// <summary>
@@ -269,13 +269,13 @@ namespace Nodify.Interactivity
                 /// <summary>
                 /// Gesture used to activate the previous keyboard navigation layer.
                 /// </summary>
-                /// <remarks><see cref="ModifierKeys.Control"/>+<see cref="Key.OemCloseBrackets"/>.</remarks>
+                /// <remarks><see cref="KeyModifiers.Control"/>+<see cref="Key.OemCloseBrackets"/>.</remarks>
                 public InputGestureRef NextNavigationLayer { get; }
 
                 /// <summary>
                 /// Gesture used to activate the next keyboard navigation layer.
                 /// </summary>
-                /// <remarks><see cref="ModifierKeys.Control"/>+<see cref="Key.OemOpenBrackets"/>.</remarks>
+                /// <remarks><see cref="KeyModifiers.Control"/>+<see cref="Key.OemOpenBrackets"/>.</remarks>
                 public InputGestureRef PrevNavigationLayer { get; }
 
                 /// <summary>Copies from the specified gestures.</summary>
@@ -310,19 +310,19 @@ namespace Nodify.Interactivity
             {
                 Keyboard = new KeyboardGestures();
                 Selection = new SelectionGestures();
-                SelectAll = ApplicationCommands.SelectAll.InputGestures[0].AsRef();
-                Cutting = new MouseGesture(MouseAction.LeftClick, ModifierKeys.Alt | ModifierKeys.Shift, true);
-                PushItems = new MouseGesture(MouseAction.LeftClick, ModifierKeys.Control | ModifierKeys.Shift, true);
+                SelectAll = new KeyGesture(Key.A, KeyModifiers.Control).AsRef();
+                Cutting = new MouseGesture(MouseAction.LeftClick, KeyModifiers.Alt | KeyModifiers.Shift, true);
+                PushItems = new MouseGesture(MouseAction.LeftClick, KeyModifiers.Control | KeyModifiers.Shift, true);
                 Pan = new AnyGesture(new MouseGesture(MouseAction.RightClick), new MouseGesture(MouseAction.MiddleClick));
-                ZoomModifierKey = ModifierKeys.None;
-                ZoomIn = new AnyGesture(new KeyGesture(Key.OemPlus, ModifierKeys.Control), new KeyGesture(Key.Add, ModifierKeys.Control));
-                ZoomOut = new AnyGesture(new KeyGesture(Key.OemMinus, ModifierKeys.Control), new KeyGesture(Key.Subtract, ModifierKeys.Control));
+                ZoomModifierKey = KeyModifiers.None;
+                ZoomIn = new AnyGesture(new KeyGesture(Key.OemPlus, KeyModifiers.Control), new KeyGesture(Key.Add, KeyModifiers.Control));
+                ZoomOut = new AnyGesture(new KeyGesture(Key.OemMinus, KeyModifiers.Control), new KeyGesture(Key.Subtract, KeyModifiers.Control));
                 ResetViewport = new KeyGesture(Key.Home);
-                FitToScreen = new KeyGesture(Key.Home, ModifierKeys.Shift);
+                FitToScreen = new KeyGesture(Key.Home, KeyModifiers.Shift);
                 CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new KeyGesture(Key.Escape));
                 PanWithMouseWheel = false;
-                PanHorizontalModifierKey = ModifierKeys.Shift;
-                PanVerticalModifierKey = ModifierKeys.None;
+                PanHorizontalModifierKey = KeyModifiers.Shift;
+                PanVerticalModifierKey = KeyModifiers.None;
             }
 
             public KeyboardGestures Keyboard { get; }
@@ -345,27 +345,27 @@ namespace Nodify.Interactivity
             public bool PanWithMouseWheel { get; set; }
 
             /// <summary>The modifier key required to start panning vertically with the mouse wheel (see <see cref="PanWithMouseWheel"/>)</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.None"/>.</remarks>
-            public ModifierKeys PanVerticalModifierKey { get; set; }
+            /// <remarks>Defaults to <see cref="KeyModifiers.None"/>.</remarks>
+            public KeyModifiers PanVerticalModifierKey { get; set; }
 
             /// <summary>The modifier key required to start panning horizontally with the mouse wheel (see <see cref="PanWithMouseWheel"/>)</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Shift"/>.</remarks>
-            public ModifierKeys PanHorizontalModifierKey { get; set; }
+            /// <remarks>Defaults to <see cref="KeyModifiers.Shift"/>.</remarks>
+            public KeyModifiers PanHorizontalModifierKey { get; set; }
 
             /// <summary>Gesture used to start pushing.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+<see cref="ModifierKeys.Shift"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Control"/>+<see cref="KeyModifiers.Shift"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
             public InputGestureRef PushItems { get; }
 
             /// <summary>The key modifier required to start zooming by mouse wheel.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.None"/>.</remarks>
-            public ModifierKeys ZoomModifierKey { get; set; }
+            /// <remarks>Defaults to <see cref="KeyModifiers.None"/>.</remarks>
+            public KeyModifiers ZoomModifierKey { get; set; }
 
             /// <summary>Gesture used to zoom in.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+<see cref="Key.OemPlus"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Control"/>+<see cref="Key.OemPlus"/>.</remarks>
             public InputGestureRef ZoomIn { get; }
 
             /// <summary>Gesture used to zoom out.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+<see cref="Key.OemMinus"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Control"/>+<see cref="Key.OemMinus"/>.</remarks>
             public InputGestureRef ZoomOut { get; }
 
             /// <summary>Gesture used to move the editor's viewport location to (0, 0) and set the zoom to 1.</summary>
@@ -373,7 +373,7 @@ namespace Nodify.Interactivity
             public InputGestureRef ResetViewport { get; }
 
             /// <summary>Gesture used to fit as many containers as possible into the viewport.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Shift"/>+<see cref="Key.Home"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Shift"/>+<see cref="Key.Home"/>.</remarks>
             public InputGestureRef FitToScreen { get; }
 
             /// <summary>Gesture to cancel the current operation.</summary>
@@ -425,13 +425,13 @@ namespace Nodify.Interactivity
         {
             public ConnectorGestures()
             {
-                Disconnect = new AnyGesture(new MouseGesture(MouseAction.LeftClick, ModifierKeys.Alt), new KeyGesture(Key.Delete));
+                Disconnect = new AnyGesture(new MouseGesture(MouseAction.LeftClick, KeyModifiers.Alt), new KeyGesture(Key.Delete));
                 Connect = new AnyGesture(new MouseGesture(MouseAction.LeftClick), new KeyGesture(Key.Space));
                 CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new KeyGesture(Key.Escape));
             }
 
             /// <summary>Gesture to call the <see cref="Connector.DisconnectCommand"/>.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Alt"/>+<see cref="MouseAction.LeftClick"/> or <see cref="Key.Delete"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Alt"/>+<see cref="MouseAction.LeftClick"/> or <see cref="Key.Delete"/>.</remarks>
             public InputGestureRef Disconnect { get; }
 
             /// <summary>Gesture to start and complete a pending connection.</summary>
@@ -469,7 +469,7 @@ namespace Nodify.Interactivity
             {
                 Split = new MouseGesture(MouseAction.LeftDoubleClick);
                 Selection = new SelectionGestures(MouseAction.LeftClick);
-                Disconnect = new MouseGesture(MouseAction.LeftClick, ModifierKeys.Alt);
+                Disconnect = new MouseGesture(MouseAction.LeftClick, KeyModifiers.Alt);
             }
 
             /// <summary>Gesture to call the <see cref="BaseConnection.SplitCommand"/> command.</summary>
@@ -480,7 +480,7 @@ namespace Nodify.Interactivity
             public SelectionGestures Selection { get; }
 
             /// <summary>Gesture to call the <see cref="BaseConnection.DisconnectCommand"/> command.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Alt"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Alt"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
             public InputGestureRef Disconnect { get; }
 
             /// <summary>Copies from the specified gestures.</summary>
@@ -508,18 +508,18 @@ namespace Nodify.Interactivity
         {
             public GroupingNodeGestures()
             {
-                SwitchMovementMode = ModifierKeys.Shift;
-                ToggleContentSelection = new AnyGesture(new KeyGesture(Key.Space, ModifierKeys.Control), new KeyGesture(Key.Enter, ModifierKeys.Control));
+                SwitchMovementMode = KeyModifiers.Shift;
+                ToggleContentSelection = new AnyGesture(new KeyGesture(Key.Space, KeyModifiers.Control), new KeyGesture(Key.Enter, KeyModifiers.Control));
             }
 
             /// <summary>The key modifier that will toggle between <see cref="GroupingMovementMode"/>s.</summary>
             /// <remarks>The modifier must be allowed by the <see cref="ItemContainer.Drag"/> gesture.
-            /// <br /> Defaults to <see cref="ModifierKeys.Shift"/>.
+            /// <br /> Defaults to <see cref="KeyModifiers.Shift"/>.
             /// </remarks>
-            public ModifierKeys SwitchMovementMode { get; set; }
+            public KeyModifiers SwitchMovementMode { get; set; }
 
             /// <summary>Gesture to toggle the content selection of the <see cref="GroupingNode"/> when it is selected.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+<see cref="Key.Space"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Control"/>+<see cref="Key.Space"/>.</remarks>
             public InputGestureRef ToggleContentSelection { get; }
 
             /// <summary>Copies from the specified gestures.</summary>
@@ -548,9 +548,9 @@ namespace Nodify.Interactivity
                 DragViewport = new MouseGesture(MouseAction.LeftClick);
                 ResetViewport = new KeyGesture(Key.Home);
                 CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new KeyGesture(Key.Escape));
-                ZoomIn = new AnyGesture(new KeyGesture(Key.OemPlus, ModifierKeys.Control), new KeyGesture(Key.Add, ModifierKeys.Control));
-                ZoomOut = new AnyGesture(new KeyGesture(Key.OemMinus, ModifierKeys.Control), new KeyGesture(Key.Subtract, ModifierKeys.Control));
-                ZoomModifierKey = ModifierKeys.None;
+                ZoomIn = new AnyGesture(new KeyGesture(Key.OemPlus, KeyModifiers.Control), new KeyGesture(Key.Add, KeyModifiers.Control));
+                ZoomOut = new AnyGesture(new KeyGesture(Key.OemMinus, KeyModifiers.Control), new KeyGesture(Key.Subtract, KeyModifiers.Control));
+                ZoomModifierKey = KeyModifiers.None;
             }
 
             /// <summary>
@@ -570,16 +570,16 @@ namespace Nodify.Interactivity
             public InputGestureRef CancelAction { get; }
 
             /// <summary>Gesture used to zoom in.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+<see cref="Key.OemPlus"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Control"/>+<see cref="Key.OemPlus"/>.</remarks>
             public InputGestureRef ZoomIn { get; }
 
             /// <summary>Gesture used to zoom out.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+<see cref="Key.OemMinus"/>.</remarks>
+            /// <remarks>Defaults to <see cref="KeyModifiers.Control"/>+<see cref="Key.OemMinus"/>.</remarks>
             public InputGestureRef ZoomOut { get; }
 
             /// <summary>The key modifier required to start zooming by mouse wheel.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.None"/>.</remarks>
-            public ModifierKeys ZoomModifierKey { get; set; }
+            /// <remarks>Defaults to <see cref="KeyModifiers.None"/>.</remarks>
+            public KeyModifiers ZoomModifierKey { get; set; }
 
             /// <summary>Copies from the specified gestures.</summary>
             /// <param name="gestures">The gestures to copy.</param>
