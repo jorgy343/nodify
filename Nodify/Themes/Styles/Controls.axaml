@@ -1,23 +1,23 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui">
     <ResourceDictionary.MergedDictionaries>
         <!--NODES-->
-        <ResourceDictionary Source="Node.xaml" />
-        <ResourceDictionary Source="KnotNode.xaml" />
-        <ResourceDictionary Source="GroupingNode.xaml" />
-        <ResourceDictionary Source="StateNode.xaml" />
-        <ResourceDictionary Source="Connector.xaml" />
-        <ResourceDictionary Source="NodeInput.xaml" />
-        <ResourceDictionary Source="NodeOutput.xaml" />
-        <ResourceDictionary Source="Connection.xaml" />
-        <ResourceDictionary Source="PendingConnection.xaml" />
-        <ResourceDictionary Source="CuttingLine.xaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/Node.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/KnotNode.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/GroupingNode.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/StateNode.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/Connector.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/NodeInput.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/NodeOutput.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/Connection.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/PendingConnection.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/CuttingLine.axaml" />
 
         <!--CORE-->
-        <ResourceDictionary Source="ItemContainer.xaml" />
-        <ResourceDictionary Source="DecoratorContainer.xaml" />
-        <ResourceDictionary Source="NodifyEditor.xaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/ItemContainer.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/DecoratorContainer.axaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/NodifyEditor.axaml" />
         
         <!--WIDGETS-->
-        <ResourceDictionary Source="Minimap.xaml" />
+        <ResourceDictionary Source="avares://Nodify/Themes/Styles/Minimap.axaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
