@@ -89,9 +89,9 @@ This project is currently in active development. Core utilities and base classes
 - ✅ Value converters
 - ✅ Basic Node control
 - ✅ Editor controls (NodifyEditor, NodifyCanvas, EditorCommands)
+- ✅ Connection controls (BaseConnection, Connection, LineConnection)
 
 ### In Progress
-- 🚧 Connection controls
 - 🚧 Connector controls
 - 🚧 Interactivity system
 - 🚧 Themes and styles
