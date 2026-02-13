@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System;
-using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Input;
+using Avalonia.Media;
 using System.Diagnostics;
 using Nodify.Interactivity;
 

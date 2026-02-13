@@ -1,6 +1,6 @@
-﻿using System.Windows;
-using System.Windows.Media;
-using System.Windows.Shapes;
+﻿using Avalonia;
+using Avalonia.Media;
+using Avalonia.Controls.Shapes;
 
 namespace Nodify
 {

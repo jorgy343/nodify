@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
-using System.Windows.Controls.Primitives;
-using System.Windows.Controls;
-using System.Windows;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls;
+using Avalonia;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Collections.Generic;
-using System.Windows.Input;
-using System.Windows.Shapes;
+using Avalonia.Input;
+using Avalonia.Controls.Shapes;
 using Nodify.Interactivity;
 
 namespace Nodify

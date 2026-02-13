@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Nodify">
 
@@ -37,7 +37,7 @@
                       Offset="1" />
     </LinearGradientBrush>
 
-    <Style TargetType="{x:Type local:NodeInput}">
+    <Style TargetType="{x:Type local:NodeOutput}">
         <Setter Property="BorderBrush"
                 Value="DodgerBlue" />
         <Setter Property="Background"
@@ -50,7 +50,7 @@
                 Value="{StaticResource ConnectorThumbTemplate}" />
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type local:NodeInput}">
+                <ControlTemplate TargetType="{x:Type local:NodeOutput}">
                     <Grid Background="{TemplateBinding Background}">
                         <Border Visibility="Collapsed"
                                 x:Name="Highlight"
@@ -58,18 +58,19 @@
                                 Background="{TemplateBinding BorderBrush}" />
 
                         <StackPanel Orientation="{TemplateBinding Orientation}"
+                                    HorizontalAlignment="Right"
                                     Margin="{TemplateBinding Padding}">
+
+                            <ContentPresenter ContentSource="Header" />
 
                             <Control x:Name="PART_Connector"
                                      Focusable="False"
-                                     Margin="0 0 5 0"
+                                     Margin="5 0 0 0"
                                      VerticalAlignment="Center"
                                      HorizontalAlignment="Center"
                                      Background="Transparent"
                                      BorderBrush="{TemplateBinding BorderBrush}"
                                      Template="{TemplateBinding ConnectorTemplate}" />
-
-                            <ContentPresenter ContentSource="Header" />
                         </StackPanel>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -77,14 +78,14 @@
                                  Value="Vertical">
                             <Setter TargetName="PART_Connector"
                                     Property="Margin"
-                                    Value="0 0 0 5" />
+                                    Value="0 5 0 0" />
                             <Setter Property="Padding"
                                     Value="2 4" />
                             <Setter TargetName="Highlight"
                                     Property="OpacityMask"
                                     Value="{StaticResource FadeOpacityMaskVertical}" />
                         </Trigger>
-                        
+
                         <Trigger Property="IsConnected"
                                  Value="True">
                             <Setter TargetName="PART_Connector"
@@ -114,5 +115,4 @@
             </Setter.Value>
         </Setter>
     </Style>
-
 </ResourceDictionary>

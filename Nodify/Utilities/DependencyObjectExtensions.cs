@@ -1,53 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
+using Avalonia;
+using Avalonia.Media;
+using Avalonia.VisualTree;
+using Avalonia.Controls;
+//using Avalonia.Animation; // TODO: Animations need Avalonia-specific implementation
 
 namespace Nodify
 {
-    internal static class DependencyObjectExtensions
+    internal static class VisualExtensions
     {
-        public static T? GetParentOfType<T>(this DependencyObject current)
-            where T : DependencyObject
+        public static T? GetParentOfType<T>(this Visual current)
+            where T : class
         {
-            while ((current = VisualTreeHelper.GetParent(current)) != null)
+            var parent = current.GetVisualParent();
+            while (parent != null)
             {
-                if (current is T match)
+                if (parent is T match)
                 {
                     return match;
                 }
+                parent = parent.GetVisualParent();
             }
 
             return null;
         }
 
-        public static DependencyObject? GetParent(this DependencyObject current, Func<DependencyObject, bool> condition)
+        public static Visual? GetParent(this Visual current, Func<Visual, bool> condition)
         {
-            while ((current = VisualTreeHelper.GetParent(current)) != null)
+            var parent = current.GetVisualParent();
+            while (parent != null)
             {
-                if (condition(current))
+                if (condition(parent))
                 {
-                    return current;
+                    return parent;
                 }
+                parent = parent.GetVisualParent();
             }
 
             return null;
         }
 
-        public static T? GetChildOfType<T>(this DependencyObject? depObj) where T : DependencyObject
+        public static T? GetChildOfType<T>(this Visual? depObj) where T : class
         {
             if (depObj == null)
             {
                 return default;
             }
 
-            var count = VisualTreeHelper.GetChildrenCount(depObj);
-            for (int i = 0; i < count; i++)
+            var children = depObj.GetVisualChildren();
+            foreach (var child in children)
             {
-                var child = VisualTreeHelper.GetChild(depObj, i);
-
                 if (child is T result)
                 {
                     return result;
@@ -62,81 +66,38 @@ namespace Nodify
             return default;
         }
 
-        public static T? GetElementAtPosition<T>(this UIElement container, Point position)
-            where T : UIElement
+        public static T? GetElementAtPosition<T>(this Control container, Point position)
+            where T : Control
         {
-            T? result = default;
-            VisualTreeHelper.HitTest(container, depObj =>
-            {
-                if (depObj is UIElement elem && elem.IsHitTestVisible)
-                {
-                    if (elem is T r)
-                    {
-                        result = r;
-                        return HitTestFilterBehavior.Stop;
-                    }
-
-                    return HitTestFilterBehavior.Continue;
-                }
-
-                return HitTestFilterBehavior.ContinueSkipSelfAndChildren;
-            }, hitResult =>
-            {
-                if (hitResult.VisualHit is T r)
-                {
-                    result = r;
-                    return HitTestResultBehavior.Stop;
-                }
-                return HitTestResultBehavior.Continue;
-            }, new PointHitTestParameters(position));
-
+            var result = container.InputHitTest(position) as T;
             return result;
         }
 
-        public static List<FrameworkElement> GetIntersectingElements(this UIElement container, Geometry geometry, IReadOnlyCollection<Type> supportedTypes)
+        public static List<Control> GetIntersectingElements(this Control container, Geometry geometry, IReadOnlyCollection<Type> supportedTypes)
         {
-            var result = new List<FrameworkElement>();
-            VisualTreeHelper.HitTest(container, depObj =>
-            {
-                if (depObj is FrameworkElement elem && elem.IsHitTestVisible)
-                {
-                    if (supportedTypes.Contains(elem.GetType()))
-                    {
-                        return HitTestFilterBehavior.ContinueSkipChildren;
-                    }
-
-                    return HitTestFilterBehavior.ContinueSkipSelf;
-                }
-
-                return HitTestFilterBehavior.ContinueSkipSelfAndChildren;
-            }, hitResult =>
-            {
-                result.Add((FrameworkElement)hitResult.VisualHit);
-                return HitTestResultBehavior.Continue;
-            }, new GeometryHitTestParameters(geometry));
-
+            var result = new List<Control>();
+            // TODO: Implement geometry-based hit testing for Avalonia
+            // This is a simplified version - full implementation would need custom logic
             return result;
         }
 
-        public static IEnumerable<T> GetIntersectingElements<T>(this UIElement container, Rect area, Func<T, Rect> getBounds)
+        public static IEnumerable<T> GetIntersectingElements<T>(this Visual container, Rect area, Func<T, Rect> getBounds)
             where T : Visual
         {
-            var stack = new Stack<DependencyObject>();
+            var stack = new Stack<Visual>();
             stack.Push(container);
 
             while (stack.Count > 0)
             {
-                DependencyObject current = stack.Pop();
-                int childrenCount = VisualTreeHelper.GetChildrenCount(current);
+                Visual current = stack.Pop();
+                var children = current.GetVisualChildren();
 
-                for (int i = 0; i < childrenCount; i++)
+                foreach (var child in children)
                 {
-                    DependencyObject child = VisualTreeHelper.GetChild(current, i);
-
                     if (child is T tChild)
                     {
                         var bounds = getBounds(tChild);
-                        if (bounds.IntersectsWith(area))
+                        if (bounds.Intersects(area))
                         {
                             yield return tChild;
                             continue;
@@ -149,74 +110,31 @@ namespace Nodify
         }
 
         #region Animation
+        // TODO: Avalonia uses a different animation system
+        // These methods need to be reimplemented using Avalonia.Animation
+        // For now, commenting out to allow compilation
 
-        public static void StartAnimation(this UIElement animatableElement, DependencyProperty dependencyProperty, Point toValue, double animationDurationSeconds, EventHandler? completedEvent = null)
+        /*
+        public static void StartAnimation(this Control animatableElement, AvaloniaProperty dependencyProperty, Point toValue, double animationDurationSeconds, EventHandler? completedEvent = null)
         {
-            var fromValue = (Point)animatableElement.GetValue(dependencyProperty);
-
-            PointAnimation animation = new PointAnimation
-            {
-                From = fromValue,
-                To = toValue,
-                Duration = TimeSpan.FromSeconds(animationDurationSeconds)
-            };
-
-            animation.Completed += delegate (object? sender, EventArgs e)
-            {
-                animatableElement.SetValue(dependencyProperty, animatableElement.GetValue(dependencyProperty));
-                CancelAnimation(animatableElement, dependencyProperty);
-
-                completedEvent?.Invoke(sender, e);
-            };
-
-            animation.Freeze();
-
-            animatableElement.BeginAnimation(dependencyProperty, animation);
+            // TODO: Implement using Avalonia animation system
         }
 
-        public static void StartAnimation(this UIElement animatableElement, DependencyProperty dependencyProperty, double toValue, double animationDurationSeconds, EventHandler? completedEvent = null)
+        public static void StartAnimation(this Control animatableElement, AvaloniaProperty dependencyProperty, double toValue, double animationDurationSeconds, EventHandler? completedEvent = null)
         {
-            var fromValue = (double)animatableElement.GetValue(dependencyProperty);
-
-            DoubleAnimation animation = new DoubleAnimation
-            {
-                From = fromValue,
-                To = toValue,
-                Duration = TimeSpan.FromSeconds(animationDurationSeconds)
-            };
-
-            animation.Completed += delegate (object? sender, EventArgs e)
-            {
-                animatableElement.SetValue(dependencyProperty, animatableElement.GetValue(dependencyProperty));
-                CancelAnimation(animatableElement, dependencyProperty);
-
-                completedEvent?.Invoke(sender, e);
-            };
-
-            animation.Freeze();
-
-            animatableElement.BeginAnimation(dependencyProperty, animation);
+            // TODO: Implement using Avalonia animation system
         }
 
-        public static void StartLoopingAnimation(this UIElement animatableElement, DependencyProperty dependencyProperty, double toValue, double durationInSeconds)
+        public static void StartLoopingAnimation(this Control animatableElement, AvaloniaProperty dependencyProperty, double toValue, double durationInSeconds)
         {
-            var fromValue = (double)animatableElement.GetValue(dependencyProperty);
-
-            var animation = new DoubleAnimation
-            {
-                From = fromValue,
-                To = toValue,
-                Duration = TimeSpan.FromSeconds(durationInSeconds)
-            };
-
-            animation.RepeatBehavior = RepeatBehavior.Forever;
-
-            animation.Freeze();
-            animatableElement.BeginAnimation(dependencyProperty, animation);
+            // TODO: Implement using Avalonia animation system
         }
 
-        public static void CancelAnimation(this UIElement animatableElement, DependencyProperty dependencyProperty)
-            => animatableElement.BeginAnimation(dependencyProperty, null);
+        public static void CancelAnimation(this Control animatableElement, AvaloniaProperty dependencyProperty)
+        {
+            // TODO: Implement using Avalonia animation system
+        }
+        */
 
         #endregion
     }
